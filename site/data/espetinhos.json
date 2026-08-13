@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "name": "Espetinho de Frango ou Porco", "desc": "", "price": 6.90 },
+    { "name": "Espetinho Misto", "desc": "Porco, frango e calabresa", "price": 7.90 },
+    { "name": "Espetinho de Carne", "desc": "", "price": 8.90 }
+  ]
+}

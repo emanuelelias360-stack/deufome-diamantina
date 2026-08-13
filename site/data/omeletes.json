@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "name": "Omelete Simples", "desc": "Ovo, queijo e presunto", "price": 16.90 },
+    { "name": "Omelete Completa", "desc": "Ovo, queijo, presunto, tomate e carne mista", "price": 21.90 }
+  ]
+}

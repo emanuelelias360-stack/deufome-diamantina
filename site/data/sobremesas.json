@@ -1,0 +1,6 @@
+{
+  "items": [
+    { "name": "Mini Pudim", "desc": "Clássico, cremoso e irresistível", "price": 5.00 },
+    { "name": "Mousse de Maracujá", "desc": "Leve, aerado — equilíbrio perfeito entre doce e azedinho", "price": 5.00 }
+  ]
+}

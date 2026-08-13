@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "name": "Opção 1 — Arroz, Farofa e Espetinho", "desc": "Arroz, farofa, vinagrete e espetinho (a jantinha acompanha o espeto)", "price": 24.90 },
+    { "name": "Opção 2 — Arroz, Tropeiro e Espetinho", "desc": "Arroz, tropeiro, vinagrete e espetinho (a jantinha acompanha o espeto)", "price": 26.90 },
+    { "name": "Opção 3 — Arroz, Omelete e Espetinho", "desc": "Arroz, omelete (ovo e queijo), vinagrete (a jantinha acompanha o espeto)", "price": 20.99 }
+  ]
+}

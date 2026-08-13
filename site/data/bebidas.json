@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Coca-Cola Original 2L", "desc": "", "price": 15.00 },
+    { "name": "Coca-Cola Zero 2L", "desc": "", "price": 15.00 },
+    { "name": "Guaraná Antarctica 2L", "desc": "", "price": 14.00 },
+    { "name": "Guaraná Antarctica 1L", "desc": "", "price": 8.00 },
+    { "name": "Pitchulinha", "desc": "Coca-Cola, Guaraná, Uva ou Pepsi", "price": 3.00 }
+  ]
+}

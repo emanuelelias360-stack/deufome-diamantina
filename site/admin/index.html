@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel — DeuFome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --dark:#0d0a08;
+    --app-bg:#14100c;
+    --card:#211a14;
+    --card-2:#2a2119;
+    --border:#3a2c1f;
+    --orange:#f2891f;
+    --orange-strong:#ff5a1f;
+    --gold:#e8b34a;
+    --ink:#f5ece0;
+    --ink-soft:#c9bba9;
+    --ink-faint:#8f8072;
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 14px 34px -18px rgba(0,0,0,.65);
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif;
+    background:var(--app-bg);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Poppins',sans-serif}
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  button{font-family:inherit;border:none;cursor:pointer;background:none}
+  input,textarea{font-family:inherit;font-size:inherit}
+
+  .logo-badge{
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 30%, #241b12, #120d09);
+    border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;line-height:1;
+  }
+
+  /* ── Gate (login) ── */
+  #gate{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:22px;background:var(--dark);color:#fff;text-align:center;padding:24px;
+  }
+  #gate .logo-badge{width:64px;height:64px;font-size:28px;margin-bottom:4px}
+  #gate h1{font-weight:800;font-size:26px}
+  #gate p{color:rgba(245,236,224,.65);font-size:14.5px;max-width:320px;line-height:1.5}
+  .btn-gold{
+    background:var(--orange);color:#1a1006;font-weight:700;font-size:14.5px;
+    padding:13px 26px;border-radius:999px;transition:background .15s;
+  }
+  .btn-gold:hover{background:var(--orange-strong)}
+
+  /* ── App shell ── */
+  #app{display:none;min-height:100vh;flex-direction:column}
+  #app.show{display:flex}
+  .topbar{
+    background:var(--dark);color:#fff;display:flex;align-items:center;gap:12px;
+    padding:14px 20px;position:sticky;top:0;z-index:40;box-shadow:var(--shadow);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar .logo-badge{width:38px;height:38px;font-size:18px}
+  .topbar .brand{font-weight:800;font-size:17px;flex:1;min-width:0}
+  .topbar .brand small{display:block;font-family:'Inter',sans-serif;font-style:normal;font-weight:400;
+    font-size:11.5px;color:rgba(245,236,224,.6);letter-spacing:.03em}
+  .topbar-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .link-ghost{
+    color:rgba(245,236,224,.85);font-size:13px;font-weight:600;padding:8px 12px;
+    border-radius:999px;border:1px solid rgba(245,236,224,.2);transition:all .15s;white-space:nowrap;
+  }
+  .link-ghost:hover{background:rgba(245,236,224,.08)}
+
+  main{flex:1;width:100%;max-width:1020px;margin:0 auto;padding:22px 20px 60px}
+
+  /* ── Tabs ── */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .tab{
+    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;
+    background:var(--card);color:var(--ink-soft);border:1px solid var(--border);transition:all .15s;
+  }
+  .tab.active{background:var(--orange);color:#1a1006;border-color:var(--orange)}
+  .tab .count{opacity:.7;font-weight:600;margin-left:4px}
+
+  /* ── Status bar ── */
+  .statusbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft)}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-faint)}
+  .status.dirty .dot{background:var(--gold)}
+  .status.saving .dot{background:var(--orange);animation:pulse 1s infinite}
+  .status.error .dot{background:#e07a5f}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .statusbar-actions{display:flex;gap:10px}
+  .btn-primary{
+    background:var(--orange);color:#1a1006;font-weight:700;font-size:13.5px;
+    padding:10px 20px;border-radius:999px;transition:opacity .15s;
+  }
+  .btn-primary:disabled{opacity:.35;cursor:default}
+  .btn-primary:not(:disabled):hover{opacity:.88}
+  .btn-text{color:var(--ink-soft);font-size:13px;font-weight:600;text-decoration:underline;padding:10px 4px}
+
+  /* ── Grid ── */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+  .card-photo{
+    aspect-ratio:4/3;background:var(--card-2);display:flex;align-items:center;justify-content:center;
+    color:var(--ink-faint);overflow:hidden;
+  }
+  .card-photo img{width:100%;height:100%;object-fit:cover}
+  .card-body{padding:13px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .card-body h3{font-size:15px;font-weight:700;line-height:1.25}
+  .card-body p{font-size:12.5px;color:var(--ink-soft);line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card-price{font-family:'Poppins',sans-serif;font-weight:700;color:var(--gold);font-size:14px;margin-top:auto;padding-top:4px}
+  .card-actions{display:flex;gap:8px;padding:0 14px 14px}
+  .icon-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);
+    font-size:12.5px;font-weight:600;color:var(--ink-soft);transition:all .15s;
+  }
+  .icon-btn:hover{border-color:var(--orange);color:var(--orange)}
+  .icon-btn.danger:hover{border-color:#e07a5f;color:#e07a5f}
+
+  .card-add{
+    border:2px dashed var(--border);border-radius:var(--radius);background:transparent;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    color:var(--ink-faint);font-weight:700;font-size:13.5px;min-height:180px;transition:all .15s;
+  }
+  .card-add:hover{border-color:var(--orange);color:var(--orange)}
+  .card-add .plus{font-size:30px;line-height:1;font-family:'Poppins',sans-serif;font-weight:400}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--ink-faint);font-size:14px}
+
+  /* ── Modal ── */
+  #modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;
+    align-items:flex-start;justify-content:center;padding:26px 16px;overflow-y:auto;
+  }
+  #modal-overlay.show{display:flex}
+  .modal{
+    background:var(--app-bg);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:420px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
+  }
+  .modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-head h2{font-size:18px;font-weight:700}
+  .modal-close{font-size:20px;color:var(--ink-faint);padding:4px 8px}
+  .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
+  .field input[type=text],.field input[type=number],.field textarea{
+    width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);
+    color:var(--ink);padding:10px 12px;font-size:14px;outline:none;
+  }
+  .field input:focus,.field textarea:focus{border-color:var(--orange)}
+  .field textarea{resize:vertical;min-height:64px}
+  .field-row{display:flex;gap:10px}
+  .field-row .field{flex:1}
+  .photo-field{display:flex;align-items:center;gap:12px}
+  .photo-preview{
+    width:64px;height:64px;border-radius:var(--radius-sm);background:var(--card-2);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-faint);overflow:hidden;flex-shrink:0;font-size:11px;
+  }
+  .photo-preview img{width:100%;height:100%;object-fit:cover}
+  .photo-actions{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+  .photo-actions label{color:var(--gold);font-weight:700;cursor:pointer}
+  .photo-actions button{color:var(--ink-faint);font-weight:600;text-align:left}
+  .modal-error{background:#3a1f16;color:#f0a98c;font-size:12.5px;padding:9px 12px;border-radius:var(--radius-sm)}
+  .modal-foot{padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+  .btn-outline{padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--ink-soft);border:1px solid var(--border)}
+  .btn-outline:hover{border-color:var(--ink-soft)}
+
+  #toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--orange);color:#1a1006;padding:12px 20px;border-radius:999px;font-size:13.5px;
+    font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .25s;z-index:200;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.error{background:#c1523a;color:#fff}
+</style>
+</head>
+<body>
+
+  <div id="gate">
+    <div class="logo-badge">🔥</div>
+    <h1>Painel DeuFome</h1>
+    <p>Entre com sua conta pra editar os itens e preços do cardápio digital.</p>
+    <button class="btn-gold" id="btn-login">Entrar</button>
+  </div>
+
+  <div id="app">
+    <header class="topbar">
+      <div class="logo-badge">🔥</div>
+      <div class="brand">Painel do Cardápio<small id="user-email"></small></div>
+      <div class="topbar-actions">
+        <a class="link-ghost" href="../index.html" target="_blank" rel="noopener">Ver cardápio</a>
+        <button class="link-ghost" id="btn-logout">Sair</button>
+      </div>
+    </header>
+
+    <main>
+      <div class="tabs" id="tabs"></div>
+      <div class="statusbar">
+        <div class="status" id="status"><span class="dot"></span><span id="status-text">Carregando…</span></div>
+        <div class="statusbar-actions">
+          <button class="btn-text" id="btn-discard" hidden>Descartar alterações</button>
+          <button class="btn-primary" id="btn-save" disabled>Salvar alterações</button>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+
+  <div id="modal-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="modal-title">Novo item</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-foot">
+        <button class="btn-outline" id="modal-cancel">Cancelar</button>
+        <button class="btn-primary" id="modal-save">Salvar item</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const BRANCH = "main";
+  // Git Gateway já sabe qual é o repositório (configurado na Netlify) — a URL
+  // não leva /repos/dono/nome/, só /contents/<caminho>. Ver github.com/netlify/git-gateway/blob/master/api/github.go
+  const API_BASE = `/.netlify/git/github/contents/`;
+
+  const CATEGORIES = [
+    { key:"jantinhas", label:"Jantinhas", file:"site/data/jantinhas.json", singular:"jantinha",
+      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"espetinhos", label:"Espetinhos", file:"site/data/espetinhos.json", singular:"espetinho",
+      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"omeletes", label:"Omeletes", file:"site/data/omeletes.json", singular:"omelete",
+      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"macarrao", label:"Macarrão na Chapa", file:"site/data/macarrao.json", singular:"macarrão",
+      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"sobremesas", label:"Sobremesas", file:"site/data/sobremesas.json", singular:"sobremesa",
+      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"bebidas", label:"Bebidas", file:"site/data/bebidas.json", singular:"bebida",
+      priceFields:[{key:"price",label:"Preço"}] },
+  ];
+
+  const state = {
+    activeCat: CATEGORIES[0].key,
+    data: {},        // key -> { items:[...], sha:'...', loaded:bool, dirty:bool }
+    editing: null,   // { catKey, index|null, item:{...}, photoDataUrl|null, removePhoto:bool }
+  };
+
+  // ── Helpers ──
+  function catByKey(key){ return CATEGORIES.find(c=>c.key===key); }
+
+  function b64EncodeUnicode(str){
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function b64DecodeUnicode(str){
+    return decodeURIComponent(escape(atob(str.replace(/\n/g,""))));
+  }
+
+  function toast(msg, isError){
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.className = isError ? "show error" : "show";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>{ el.className=""; }, 3200);
+  }
+
+  async function ghFetch(path, opts){
+    opts = opts || {};
+    const user = netlifyIdentity.currentUser();
+    if(!user) throw new Error("Sessão expirada. Entra de novo.");
+    const token = await user.jwt();
+    const headers = Object.assign({ "Authorization": "Bearer " + token }, opts.headers||{});
+    if(opts.body) headers["Content-Type"] = "application/json";
+    return fetch(API_BASE + path, Object.assign({}, opts, { headers }));
+  }
+
+  async function getFile(path){
+    const res = await ghFetch(path);
+    if(!res.ok) throw new Error("Não consegui carregar " + path + " (" + res.status + ")");
+    const json = await res.json();
+    return { content: b64DecodeUnicode(json.content), sha: json.sha };
+  }
+
+  async function putFile(path, contentStr, sha, message){
+    const body = { message, branch: BRANCH, content: b64EncodeUnicode(contentStr) };
+    if(sha) body.sha = sha;
+    const res = await ghFetch(path, { method:"PUT", body: JSON.stringify(body) });
+    if(!res.ok){
+      let detail = "";
+      try{ detail = (await res.json()).message || ""; }catch(e){}
+      throw new Error("Falha ao salvar (" + res.status + ") " + detail);
+    }
+    return res.json();
+  }
+
+  function slugify(str){
+    return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+      .replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"") || "foto";
+  }
+
+  function readFileAsDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const r = new FileReader();
+      r.onload = ()=>resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  async function uploadImage(file){
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const filename = Date.now() + "-" + slugify(file.name.replace(/\.[^.]+$/,"")) + "." + ext;
+    const path = "site/imagens/cardapio/uploads/" + filename;
+    const dataUrl = await readFileAsDataURL(file);
+    const base64 = dataUrl.split(",")[1];
+    const res = await ghFetch(path, {
+      method:"PUT",
+      body: JSON.stringify({ message: "admin: upload " + filename, branch: BRANCH, content: base64 })
+    });
+    if(!res.ok) throw new Error("Falha ao enviar a foto (" + res.status + ")");
+    return "/imagens/cardapio/uploads/" + filename;
+  }
+
+  // ── Data loading ──
+  async function loadCategory(key){
+    const cat = catByKey(key);
+    setStatus("saving", "Carregando " + cat.label + "…");
+    try{
+      const { content, sha } = await getFile(cat.file);
+      const parsed = JSON.parse(content);
+      state.data[key] = { items: parsed.items || [], sha, loaded:true, dirty:false };
+      setStatus("ok", "Tudo salvo");
+    }catch(err){
+      setStatus("error", err.message);
+      toast(err.message, true);
+    }
+    render();
+  }
+
+  function ensureLoaded(key){
+    if(!state.data[key] || !state.data[key].loaded) return loadCategory(key);
+    render();
+    return Promise.resolve();
+  }
+
+  // ── Status/UI ──
+  function setStatus(kind, text){
+    const el = document.getElementById("status");
+    el.className = "status " + (kind==="dirty"?"dirty":kind==="saving"?"saving":kind==="error"?"error":"");
+    document.getElementById("status-text").textContent = text;
+  }
+
+  function currentDirty(){
+    const d = state.data[state.activeCat];
+    return d && d.dirty;
+  }
+
+  function updateStatusBar(){
+    const dirty = currentDirty();
+    document.getElementById("btn-save").disabled = !dirty;
+    document.getElementById("btn-discard").hidden = !dirty;
+    if(dirty) setStatus("dirty", "Alterações não salvas");
+    else if(state.data[state.activeCat] && state.data[state.activeCat].loaded) setStatus("ok","Tudo salvo");
+  }
+
+  function renderTabs(){
+    const tabs = document.getElementById("tabs");
+    tabs.innerHTML = "";
+    CATEGORIES.forEach(cat=>{
+      const btn = document.createElement("button");
+      btn.className = "tab" + (cat.key===state.activeCat ? " active" : "");
+      const count = state.data[cat.key] ? state.data[cat.key].items.length : null;
+      btn.innerHTML = cat.label + (count!==null ? ` <span class="count">(${count})</span>` : "");
+      btn.addEventListener("click", ()=>{
+        state.activeCat = cat.key;
+        ensureLoaded(cat.key);
+        renderTabs();
+      });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function render(){
+    renderTabs();
+    updateStatusBar();
+    const grid = document.getElementById("grid");
+    const cat = catByKey(state.activeCat);
+    const d = state.data[state.activeCat];
+    grid.innerHTML = "";
+    if(!d || !d.loaded) return;
+
+    d.items.forEach((item, idx)=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      const priceLine = cat.priceFields.map(pf=>{
+        const v = item[pf.key];
+        return v!=null && v!=="" ? "R$" + Number(v).toFixed(2).replace(".",",") : null;
+      }).filter(Boolean).join(" / ");
+      card.innerHTML = `
+        <div class="card-photo">${item.image ? `<img src="../${item.image.replace(/^\//,"")}" alt="">` : "sem foto"}</div>
+        <div class="card-body">
+          <h3>${escapeHtml(item.name||"(sem nome)")}</h3>
+          <p>${escapeHtml(item.desc||"")}</p>
+          <div class="card-price">${priceLine||""}</div>
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn edit">Editar</button>
+          <button class="icon-btn danger del">Excluir</button>
+        </div>`;
+      card.querySelector(".edit").addEventListener("click", ()=>openModal(state.activeCat, idx));
+      card.querySelector(".del").addEventListener("click", ()=>deleteItem(state.activeCat, idx));
+      grid.appendChild(card);
+    });
+
+    const addCard = document.createElement("button");
+    addCard.className = "card-add";
+    addCard.innerHTML = `<span class="plus">+</span><span>Adicionar ${cat.singular}</span>`;
+    addCard.addEventListener("click", ()=>openModal(state.activeCat, null));
+    grid.appendChild(addCard);
+
+    if(d.items.length===0){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.style.gridColumn = "1/-1";
+      empty.textContent = "Nada cadastrado ainda nessa categoria.";
+      grid.insertBefore(empty, addCard);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function deleteItem(catKey, idx){
+    const d = state.data[catKey];
+    const item = d.items[idx];
+    if(!confirm(`Excluir "${item.name}"? Isso só é gravado quando você clicar em "Salvar alterações".`)) return;
+    d.items.splice(idx,1);
+    d.dirty = true;
+    render();
+  }
+
+  // ── Modal ──
+  function openModal(catKey, idx){
+    const cat = catByKey(catKey);
+    const item = idx!=null ? Object.assign({}, state.data[catKey].items[idx]) : { name:"", desc:"", image:"" };
+    cat.priceFields.forEach(pf=>{ if(item[pf.key]==null) item[pf.key]=""; });
+    state.editing = { catKey, idx, item, photoFile:null, removePhoto:false };
+
+    document.getElementById("modal-title").textContent = idx!=null ? "Editar " + cat.singular : "Novo " + cat.singular;
+    const body = document.getElementById("modal-body");
+    body.innerHTML = `
+      <div class="modal-error" id="modal-error" hidden></div>
+      <div class="field"><label>Nome</label><input type="text" id="f-name" value="${escapeAttr(item.name)}" /></div>
+      <div class="field"><label>Descrição</label><textarea id="f-desc">${escapeHtml(item.desc||"")}</textarea></div>
+      <div class="field-row">
+        ${cat.priceFields.map(pf=>`
+          <div class="field"><label>${pf.label}</label>
+            <input type="number" step="0.01" min="0" class="f-price" data-key="${pf.key}" value="${item[pf.key]}" />
+          </div>`).join("")}
+      </div>
+      <div class="field">
+        <label>Foto</label>
+        <div class="photo-field">
+          <div class="photo-preview" id="photo-preview">${item.image ? `<img src="../${item.image.replace(/^\//,"")}" />` : "sem foto"}</div>
+          <div class="photo-actions">
+            <label>Trocar foto<input type="file" accept="image/*" id="f-photo" hidden /></label>
+            ${item.image ? `<button id="f-remove-photo">Remover foto</button>` : ""}
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById("f-photo").addEventListener("change", async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      state.editing.photoFile = file;
+      state.editing.removePhoto = false;
+      const dataUrl = await readFileAsDataURL(file);
+      document.getElementById("photo-preview").innerHTML = `<img src="${dataUrl}" />`;
+    });
+    const rmBtn = document.getElementById("f-remove-photo");
+    if(rmBtn) rmBtn.addEventListener("click", ()=>{
+      state.editing.removePhoto = true;
+      state.editing.photoFile = null;
+      document.getElementById("photo-preview").innerHTML = "sem foto";
+    });
+
+    document.getElementById("modal-overlay").classList.add("show");
+  }
+
+  function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+
+  function closeModal(){
+    document.getElementById("modal-overlay").classList.remove("show");
+    state.editing = null;
+  }
+
+  async function saveModal(){
+    const ed = state.editing;
+    if(!ed) return;
+    const cat = catByKey(ed.catKey);
+    const name = document.getElementById("f-name").value.trim();
+    const desc = document.getElementById("f-desc").value.trim();
+    const errEl = document.getElementById("modal-error");
+    errEl.hidden = true;
+
+    if(!name){ errEl.hidden=false; errEl.textContent = "Nome é obrigatório."; return; }
+
+    const prices = {};
+    for(const el of document.querySelectorAll(".f-price")){
+      const key = el.dataset.key;
+      const val = el.value.trim();
+      if(val===""){ errEl.hidden=false; errEl.textContent = "Preencha o preço."; return; }
+      const num = Number(val);
+      if(isNaN(num) || num < 0){ errEl.hidden=false; errEl.textContent = "Preço inválido."; return; }
+      prices[key] = num;
+    }
+
+    const saveBtn = document.getElementById("modal-save");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Enviando…";
+    try{
+      let image = ed.item.image || "";
+      if(ed.removePhoto) image = "";
+      if(ed.photoFile) image = await uploadImage(ed.photoFile);
+
+      const newItem = Object.assign({ name, desc }, prices);
+      if(image) newItem.image = image;
+
+      const d = state.data[ed.catKey];
+      if(ed.idx!=null) d.items[ed.idx] = newItem;
+      else d.items.push(newItem);
+      d.dirty = true;
+
+      closeModal();
+      render();
+    }catch(err){
+      errEl.hidden = false;
+      errEl.textContent = err.message;
+    }finally{
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Salvar item";
+    }
+  }
+
+  // ── Save / discard category ──
+  async function saveCategory(){
+    const key = state.activeCat;
+    const d = state.data[key];
+    const cat = catByKey(key);
+    if(!d || !d.dirty) return;
+    setStatus("saving", "Salvando…");
+    document.getElementById("btn-save").disabled = true;
+    try{
+      const content = JSON.stringify({ items: d.items }, null, 2) + "\n";
+      const result = await putFile(cat.file, content, d.sha, "admin: atualiza " + cat.label);
+      d.sha = result.content.sha;
+      d.dirty = false;
+      setStatus("ok", "Tudo salvo — o site atualiza em 1–2 minutos");
+      toast("Alterações salvas! O cardápio publicado atualiza em 1–2 minutos.");
+    }catch(err){
+      if(String(err.message).includes("409")){
+        toast("Alguém salvou essa categoria enquanto você editava. Recarregando os dados mais recentes…", true);
+        await loadCategory(key);
+      }else{
+        setStatus("error", "Erro ao salvar");
+        toast(err.message, true);
+      }
+    }
+    render();
+  }
+
+  function discardCategory(){
+    if(!confirm("Descartar as alterações não salvas dessa categoria?")) return;
+    loadCategory(state.activeCat);
+  }
+
+  window.addEventListener("beforeunload", (e)=>{
+    if(currentDirty()){ e.preventDefault(); e.returnValue=""; }
+  });
+
+  // ── Wiring ──
+  document.getElementById("btn-save").addEventListener("click", saveCategory);
+  document.getElementById("btn-discard").addEventListener("click", discardCategory);
+  document.getElementById("modal-close").addEventListener("click", closeModal);
+  document.getElementById("modal-cancel").addEventListener("click", closeModal);
+  document.getElementById("modal-save").addEventListener("click", saveModal);
+  document.getElementById("modal-overlay").addEventListener("click", (e)=>{
+    if(e.target.id==="modal-overlay") closeModal();
+  });
+
+  // ── Auth ──
+  function showApp(user){
+    document.getElementById("gate").style.display = "none";
+    const app = document.getElementById("app");
+    app.classList.add("show");
+    document.getElementById("user-email").textContent = user.email || "";
+    ensureLoaded(state.activeCat);
+  }
+  function showGate(){
+    document.getElementById("app").classList.remove("show");
+    document.getElementById("gate").style.display = "flex";
+  }
+
+  document.getElementById("btn-login").addEventListener("click", ()=>netlifyIdentity.open("login"));
+  document.getElementById("btn-logout").addEventListener("click", ()=>netlifyIdentity.logout());
+
+  netlifyIdentity.on("init", user => { user ? showApp(user) : showGate(); });
+  netlifyIdentity.on("login", user => { netlifyIdentity.close(); showApp(user); });
+  netlifyIdentity.on("logout", () => showGate());
+
+})();
+</script>
+</body>
+</html>
