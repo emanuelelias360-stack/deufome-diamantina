@@ -548,6 +548,7 @@
       const newItem = Object.assign({ name, desc }, prices);
       if(image) newItem.image = image;
       if(ed.item.recommended) newItem.recommended = ed.item.recommended;
+      if(ed.item.tag) newItem.tag = ed.item.tag;
 
       const d = state.data[ed.catKey];
       if(ed.idx!=null) d.items[ed.idx] = newItem;

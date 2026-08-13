@@ -145,12 +145,12 @@
   }
 
   /* ── Section ── */
-  .section{padding:26px 16px 6px}
+  .section{padding:22px 16px 6px}
   .section-title{
-    font-size:22px;font-weight:800;color:var(--ink);
+    font-size:21px;font-weight:800;color:var(--ink);
     margin-bottom:4px;
   }
-  .section-desc{font-size:12.5px;color:var(--ink-faint);margin-bottom:16px;line-height:1.5}
+  .section-desc{font-size:12.5px;color:var(--ink-faint);margin-bottom:14px;line-height:1.5}
 
   /* ── Product list cards (imagem à direita) ── */
   .list-cards{display:flex;flex-direction:column;gap:10px}
@@ -182,6 +182,11 @@
     display:flex;align-items:center;justify-content:center;
   }
   .card-placeholder svg{opacity:.5}
+  .card-tag{
+    align-self:flex-start;background:var(--orange);color:#1a1006;
+    font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:3px 8px;border-radius:100px;margin-bottom:5px;
+  }
 
   /* ── Recommended product cards (product screen + cart) ── */
   .ps-recommend-row,.cart-recommend-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
@@ -243,6 +248,7 @@
   .cart-item{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);gap:10px}
   .cart-item-info{flex:1;min-width:0}
   .cart-item-name{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .cart-item-variation{font-size:11.5px;color:var(--ink-faint);margin-top:1px}
   .cart-item-obs{font-size:11px;color:var(--gold);margin-top:2px;font-style:italic}
   .cart-qty{display:flex;align-items:center;gap:9px;flex-shrink:0}
   .qty-btn{
@@ -301,7 +307,18 @@
   .ps-img-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .ps-img-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--card-2)}
   .ps-body{padding:18px 18px 0}
-  .ps-name{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:10px}
+  .ps-tag{
+    display:none;background:var(--orange);color:#1a1006;font-size:10.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.03em;padding:4px 10px;border-radius:100px;margin-bottom:8px;
+  }
+  .ps-name{font-size:23px;font-weight:800;color:var(--ink);margin-bottom:10px}
+  .ps-size-label{font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:8px}
+  .ps-size-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .ps-size-tab{
+    padding:8px 16px;border-radius:100px;border:1px solid var(--border);background:var(--card);
+    color:var(--ink-soft);font-size:12.5px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;transition:all .15s;
+  }
+  .ps-size-tab.active{background:var(--orange);border-color:var(--orange);color:#1a1006;font-weight:700}
   .ps-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.7;margin-bottom:16px}
   .ps-price{font-size:24px;font-weight:800;color:var(--orange);margin-bottom:22px}
   .ps-divider{height:1px;background:var(--border);margin-bottom:18px}
@@ -312,6 +329,18 @@
     color:var(--ink);font-family:'Inter',sans-serif;font-size:13px;padding:12px;resize:none;height:80px;outline:none;
   }
   .ps-obs-textarea:focus{border-color:var(--orange)}
+
+  /* ── Adicionais (checklist dentro do produto) ── */
+  .ps-addons-list{display:flex;flex-direction:column;margin-bottom:6px}
+  .ps-addon-row{
+    display:flex;align-items:center;gap:10px;padding:10px 2px;
+    border-bottom:1px solid var(--border);cursor:pointer;
+  }
+  .ps-addon-row:last-child{border-bottom:none}
+  .ps-addon-row input{width:18px;height:18px;accent-color:var(--orange);flex-shrink:0;cursor:pointer}
+  .ps-addon-name{flex:1;font-size:13.5px;color:var(--ink)}
+  .ps-addon-price{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
+
   .ps-bottom{
     position:absolute;bottom:0;left:0;right:0;background:var(--app-bg);border-top:1px solid var(--border);
     padding:14px 16px 20px;display:flex;align-items:center;gap:12px;
@@ -446,7 +475,7 @@
   <footer class="footer">
     <div class="footer-logo">DeuFome</div>
     <a class="footer-ig" href="https://instagram.com/deufome.diamantinaoficial" target="_blank" rel="noopener">@deufome.diamantinaoficial</a>
-    <div class="footer-copy">© 2026 DeuFome · Bairro Palha, Diamantina – MG</div>
+    <div class="footer-copy">Bairro Palha, Diamantina – MG</div>
   </footer>
 
   <!-- ══════════ PRODUCT DETAIL SCREEN ══════════ -->
@@ -464,8 +493,17 @@
         </div>
       </div>
       <div class="ps-body">
+        <span class="ps-tag" id="ps-tag"></span>
         <div class="ps-name" id="ps-name"></div>
+        <div id="ps-size-section" style="display:none">
+          <div class="ps-size-label">Escolha uma opção</div>
+          <div class="ps-size-tabs" id="ps-size-tabs"></div>
+        </div>
         <div class="ps-desc" id="ps-desc"></div>
+        <div id="ps-addons-section" style="display:none">
+          <div class="ps-size-label">Adicionais (opcional)</div>
+          <div class="ps-addons-list" id="ps-addons-list"></div>
+        </div>
         <div class="ps-price" id="ps-price"></div>
         <div class="ps-divider"></div>
         <div class="ps-obs-label">
@@ -547,12 +585,12 @@ async function loadJSON(path){
   return data.items || [];
 }
 
-// Converte item vindo do CMS (price_p/price_g ou price) pro formato interno
+// Converte item vindo do CMS (prices:{label:valor} ou price) pro formato interno
 function normalizeItem(raw, prefix, index){
   const id = prefix + '-' + (raw.name ? slugify(raw.name) : index);
   const base = {
     id, name: raw.name, desc: raw.desc || '', img: raw.image || undefined,
-    recommended: raw.recommended || undefined
+    tag: raw.tag || undefined, recommended: raw.recommended || undefined
   };
   if(raw.price_p !== undefined && raw.price_g !== undefined){
     return {...base, prices: {'P': Number(raw.price_p), 'G': Number(raw.price_g)}};
@@ -566,10 +604,29 @@ function baseItemPrice(item){
 }
 
 // ────────────────────────────────────────
-// RECOMENDAÇÕES (sugestão pra aumentar o ticket médio)
+// ADICIONAIS, TAGS E RECOMENDADOS
 // ────────────────────────────────────────
+let ADDONS = [];
+// Categorias (chave curta = containerId sem "-grid") que oferecem adicionais na tela do produto.
+// Fica pronto pra uso, mas só aparece de verdade quando data/adicionais.json tiver itens.
+const ADDON_CATEGORIES = ['jantinhas','espetinhos','omeletes','macarrao'];
+const TAG_LABELS = {
+  'mais-vendido': 'Mais vendido',
+  'novidade': 'Novidade',
+  'favorito': 'Preferido da casa'
+};
 // categoria (chave curta) -> itens normalizados, alimentado pelo initCategory de cada seção
 const CATALOG = {};
+
+async function loadAddons(){
+  try{
+    const raw = await loadJSON('data/adicionais.json');
+    ADDONS = raw.map((item,i) => normalizeItem(item, 'addon', i));
+  }catch(err){
+    console.error('Erro ao carregar adicionais', err);
+    ADDONS = [];
+  }
+}
 
 function findCatalogItem(category, name){
   const items = CATALOG[category];
@@ -611,17 +668,20 @@ function buildCards(containerId, items){
   CATALOG[catKey] = items;
   el.innerHTML = items.map(item => {
     const imgSrc = item.img || '';
+    const nameHTML = escapeHtml(item.name);
     const imgHTML = imgSrc
-      ? `<img class="card-img" src="${imgSrc}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy" />${foodPlaceholderSVG()}`
+      ? `<img class="card-img" src="${escapeHtml(imgSrc)}" alt="${nameHTML}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy" />${foodPlaceholderSVG()}`
       : foodPlaceholderSVG().replace('style="display:none"','style="display:flex"');
+    const tagHTML = item.tag && TAG_LABELS[item.tag] ? `<span class="card-tag">${escapeHtml(TAG_LABELS[item.tag])}</span>` : '';
     return `
     <div class="card" onclick="openProductById('${containerId}__${item.id}')">
       <div class="card-body">
-        <div class="card-name">${item.name}</div>
-        <div class="card-desc">${item.desc||''}</div>
+        ${tagHTML}
+        <div class="card-name">${nameHTML}</div>
+        <div class="card-desc">${escapeHtml(item.desc||'')}</div>
         <div class="card-footer">
           <span class="card-price">${priceLabel(item)}</span>
-          <button class="btn-add" onclick="event.stopPropagation();openProductById('${containerId}__${item.id}')" aria-label="Adicionar ${item.name}">+</button>
+          <button class="btn-add" onclick="event.stopPropagation();openProductById('${containerId}__${item.id}')" aria-label="Adicionar ${nameHTML}">+</button>
         </div>
       </div>
       <div class="card-img-wrap">${imgHTML}</div>
@@ -632,11 +692,12 @@ function buildCards(containerId, items){
 // ────────────────────────────────────────
 // PRODUCT DETAIL SCREEN
 // ────────────────────────────────────────
-let psProduct = null, psQty = 1, psSize = null;
+let psProduct = null, psQty = 1, psSize = null, psAddons = [];
 
 function openProduct(product){
   psProduct = product;
   psQty = 1;
+  psAddons = [];
   psSize = product.prices ? Object.keys(product.prices)[0] : null;
 
   const img = document.getElementById('ps-img');
@@ -648,6 +709,13 @@ function openProduct(product){
     img.style.display='none'; ph.style.display='flex';
   }
 
+  const tagEl = document.getElementById('ps-tag');
+  if(product.tag && TAG_LABELS[product.tag]){
+    tagEl.textContent = TAG_LABELS[product.tag];
+    tagEl.style.display = 'inline-block';
+  } else {
+    tagEl.style.display = 'none';
+  }
   document.getElementById('ps-name').textContent = product.name;
   document.getElementById('ps-desc').textContent = product.desc || '';
   document.getElementById('ps-obs-textarea').value = '';
@@ -655,10 +723,46 @@ function openProduct(product){
   document.getElementById('ps-scroll').scrollTop = 0;
   document.getElementById('ps-qty-num').textContent = '1';
 
+  const sizeSection = document.getElementById('ps-size-section');
+  if(product.prices){
+    sizeSection.style.display = 'block';
+    const tabs = document.getElementById('ps-size-tabs');
+    tabs.innerHTML = Object.keys(product.prices).map(s =>
+      `<button class="ps-size-tab${s===psSize?' active':''}" onclick="psSelectSize('${s}',this)">${s}</button>`
+    ).join('');
+  } else {
+    sizeSection.style.display = 'none';
+  }
+
+  renderPsAddons();
   renderPsRecommend();
   psUpdatePrice();
   document.getElementById('product-screen').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function renderPsAddons(){
+  const section = document.getElementById('ps-addons-section');
+  const list = document.getElementById('ps-addons-list');
+  if(!ADDON_CATEGORIES.includes(psProduct._catKey) || ADDONS.length===0){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = ADDONS.map(addon => `
+    <label class="ps-addon-row">
+      <input type="checkbox" onchange="psToggleAddon('${addon.id}',this.checked)" />
+      <span class="ps-addon-name">${escapeHtml(addon.name)}</span>
+      <span class="ps-addon-price">+${fmt(addon.price)}</span>
+    </label>`).join('');
+}
+
+function psToggleAddon(addonId, checked){
+  const addon = ADDONS.find(a=>a.id===addonId);
+  if(!addon) return;
+  if(checked){ if(!psAddons.find(a=>a.id===addonId)) psAddons.push(addon); }
+  else { psAddons = psAddons.filter(a=>a.id!==addonId); }
+  psUpdatePrice();
 }
 
 function renderPsRecommend(){
@@ -698,9 +802,10 @@ function quickAddToCart(catKey, itemId){
   const item = (CATALOG[catKey]||[]).find(i=>i.id===itemId);
   if(!item) return;
   const price = baseItemPrice(item);
-  const existing = cart.find(c=>c.id===item.id && !c.obs);
+  const variation = item.prices ? Object.keys(item.prices)[0] : undefined;
+  const existing = cart.find(c=>c.id===item.id && !c.obs && !c.addons);
   if(existing){ existing.qty += 1; }
-  else { cart.push({id:item.id, name:item.name, price, qty:1}); }
+  else { cart.push({id:item.id, name:item.name, price, qty:1, variation}); }
   renderCart();
   updateBadge();
   showToast(item.name);
@@ -711,27 +816,42 @@ function closeProduct(){
   document.body.style.overflow = '';
 }
 
+function psSelectSize(size, btn){
+  psSize = size;
+  document.querySelectorAll('.ps-size-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  psUpdatePrice();
+}
+
 function psChangeQty(delta){
   psQty = Math.max(1, psQty + delta);
   document.getElementById('ps-qty-num').textContent = psQty;
   psUpdatePrice();
 }
 
+function psAddonsTotal(){
+  return psAddons.reduce((s,a)=>s+a.price, 0);
+}
+
 function psUpdatePrice(){
-  const price = psProduct.prices ? psProduct.prices[psSize] : psProduct.price;
+  const base = psProduct.prices ? psProduct.prices[psSize] : psProduct.price;
+  const price = base + psAddonsTotal();
   document.getElementById('ps-price').textContent = fmt(price);
   document.getElementById('ps-add-price').textContent = fmt(price * psQty);
 }
 
 function psAddToCart(){
-  const price = psProduct.prices ? psProduct.prices[psSize] : psProduct.price;
+  const base = psProduct.prices ? psProduct.prices[psSize] : psProduct.price;
+  const price = base + psAddonsTotal();
   const obs   = document.getElementById('ps-obs-textarea').value.trim();
-  const id    = psProduct.id + (psSize ? '_'+psSize : '');
+  const addonsKey = psAddons.map(a=>a.id).sort().join(',');
+  const id    = psProduct.id + (psSize ? '_'+psSize : '') + (addonsKey ? '_'+addonsKey : '');
   const name  = psProduct.name;
+  const addonNames = psAddons.map(a=>a.name);
 
   const existing = cart.find(c=>c.id===id && c.obs===obs);
   if(existing){ existing.qty += psQty; }
-  else { cart.push({id, name, price, qty: psQty, obs: obs||undefined}); }
+  else { cart.push({id, name, price, qty: psQty, variation: psSize||undefined, obs: obs||undefined, addons: addonNames.length?addonNames:undefined}); }
   renderCart();
   updateBadge();
   closeProduct();
@@ -821,6 +941,8 @@ function renderCart(){
     <div class="cart-item">
       <div class="cart-item-info">
         <div class="cart-item-name">${escapeHtml(c.name)}</div>
+        ${c.variation?`<div class="cart-item-variation">${escapeHtml(c.variation)}</div>`:''}
+        ${c.addons&&c.addons.length?`<div class="cart-item-variation">+ ${escapeHtml(c.addons.join(', '))}</div>`:''}
         ${c.obs?`<div class="cart-item-obs">"${escapeHtml(c.obs)}"</div>`:''}
       </div>
       <div class="cart-qty">
@@ -970,7 +1092,8 @@ function sendWhatsApp(){
     : 'Olá! Gostaria de fazer um pedido:';
 
   const itemsMsg = cart.map(c=>{
-    let line = `• ${c.qty}x ${c.name} — ${fmt(c.price*c.qty)}`;
+    let line = `• ${c.qty}x ${c.name}${c.variation?' ('+c.variation+')':''} — ${fmt(c.price*c.qty)}`;
+    if(c.addons && c.addons.length) line += c.addons.map(a=>`\n   + ${a}`).join('');
     if(c.obs) line += `\n   obs: ${c.obs}`;
     return line;
   }).join('\n');
@@ -1069,6 +1192,8 @@ setInterval(updateStatus, 60000);
 
 // ────────────────────────────────────────
 // INIT — busca cada categoria do /data e monta os cards.
+// Se o arquivo não carregar, mostra aviso pra chamar no WhatsApp
+// em vez de deixar a seção travada em "carregando".
 // ────────────────────────────────────────
 async function initCategory(jsonPath, containerId, categoryLabel){
   const el = document.getElementById(containerId);
@@ -1087,6 +1212,7 @@ async function initCategory(jsonPath, containerId, categoryLabel){
   }
 }
 
+loadAddons();
 initCategory('data/jantinhas.json', 'jantinhas-grid', 'Jantinhas');
 initCategory('data/espetinhos.json', 'espetinhos-grid', 'Espetinhos');
 initCategory('data/omeletes.json', 'omeletes-grid', 'Omeletes');
