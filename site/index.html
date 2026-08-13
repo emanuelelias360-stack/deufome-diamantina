@@ -426,6 +426,7 @@
       <option value="sec-macarrao">Macarrão na Chapa</option>
       <option value="sec-sobremesas">Sobremesas</option>
       <option value="sec-bebidas">Bebidas</option>
+      <option value="sec-adicionais">Adicionais</option>
     </select>
   </div>
 
@@ -469,6 +470,13 @@
     <h2 class="section-title">Bebidas</h2>
     <p class="section-desc"></p>
     <div class="list-cards" id="bebidas-grid"></div>
+  </section>
+
+  <!-- ══════════ ADICIONAIS ══════════ -->
+  <section id="sec-adicionais" class="section">
+    <h2 class="section-title">Adicionais</h2>
+    <p class="section-desc">Adicione ao seu pedido — soma como item avulso no carrinho.</p>
+    <div class="list-cards" id="adicionais-grid"></div>
   </section>
 
   <!-- Footer -->
@@ -1138,7 +1146,40 @@ function navScrollTo(sectionId){
   window.scrollTo({top:y, behavior:'smooth'});
 }
 
-const NAV_SECTIONS = ['jantinhas','espetinhos','omeletes','macarrao','sobremesas','bebidas'];
+const CATEGORY_KEYS_DEFAULT = ['jantinhas','espetinhos','omeletes','macarrao','sobremesas','bebidas','adicionais'];
+let NAV_SECTIONS = CATEGORY_KEYS_DEFAULT;
+
+// Lê a ordem das categorias de data/categorias.json (editável pelo painel /admin) e
+// reordena as <section> e as <option> do dropdown na tela, sem mexer no conteúdo delas.
+async function applyCategoriaOrder(){
+  let order = CATEGORY_KEYS_DEFAULT;
+  try{
+    const res = await fetch('data/categorias.json', {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data.order) && data.order.length) order = data.order;
+    }
+  }catch(err){
+    console.error('Erro ao carregar categorias.json', err);
+  }
+  const validOrder = order.filter(key => document.getElementById('sec-'+key));
+  // categoria que existe na página mas não veio no JSON (arquivo desatualizado) entra no fim, não some
+  CATEGORY_KEYS_DEFAULT.forEach(key=>{
+    if(!validOrder.includes(key) && document.getElementById('sec-'+key)) validOrder.push(key);
+  });
+
+  const select = document.getElementById('cat-select');
+  const footer = document.querySelector('.footer');
+  validOrder.forEach(key=>{
+    const section = document.getElementById('sec-'+key);
+    const option = select.querySelector(`option[value="sec-${key}"]`);
+    if(section && footer) footer.parentNode.insertBefore(section, footer);
+    if(option) select.appendChild(option);
+  });
+  NAV_SECTIONS = validOrder;
+}
+applyCategoriaOrder();
+
 window.addEventListener('scroll', ()=>{
   const offset = stickyOffset();
   let current = NAV_SECTIONS[0];
@@ -1219,6 +1260,7 @@ initCategory('data/omeletes.json', 'omeletes-grid', 'Omeletes');
 initCategory('data/macarrao.json', 'macarrao-grid', 'Macarrão na Chapa');
 initCategory('data/sobremesas.json', 'sobremesas-grid', 'Sobremesas');
 initCategory('data/bebidas.json', 'bebidas-grid', 'Bebidas');
+initCategory('data/adicionais.json', 'adicionais-grid', 'Adicionais');
 
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeProduct(); });
 </script>

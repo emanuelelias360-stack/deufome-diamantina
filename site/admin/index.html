@@ -85,7 +85,7 @@
   /* ── Tabs ── */
   .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
   .tab{
-    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;
+    padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;
     background:var(--card);color:var(--ink-soft);border:1px solid var(--border);transition:all .15s;
   }
   .tab.active{background:var(--orange);color:#1a1006;border-color:var(--orange)}
@@ -114,6 +114,10 @@
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
     overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;
   }
+  .card.dragging{
+    position:relative;z-index:50;box-shadow:0 20px 40px -14px rgba(0,0,0,.6);
+    opacity:.92;user-select:none;-webkit-user-select:none;
+  }
   .card-photo{
     aspect-ratio:4/3;background:var(--card-2);display:flex;align-items:center;justify-content:center;
     color:var(--ink-faint);overflow:hidden;
@@ -123,7 +127,7 @@
   .card-body h3{font-size:15px;font-weight:700;line-height:1.25}
   .card-body p{font-size:12.5px;color:var(--ink-soft);line-height:1.4;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .card-price{font-family:'Poppins',sans-serif;font-weight:700;color:var(--gold);font-size:14px;margin-top:auto;padding-top:4px}
+  .card-price{font-family:'Poppins',sans-serif;font-weight:700;color:var(--gold);font-size:13px;margin-top:auto;padding-top:4px;line-height:1.4}
   .card-actions{display:flex;gap:8px;padding:0 14px 14px}
   .icon-btn{
     flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
@@ -132,6 +136,23 @@
   }
   .icon-btn:hover{border-color:var(--orange);color:var(--orange)}
   .icon-btn.danger:hover{border-color:#e07a5f;color:#e07a5f}
+  .drag-handle{
+    flex:0 0 auto;padding:8px 10px;cursor:grab;touch-action:none;font-size:15px;letter-spacing:-1px;
+  }
+  .drag-handle:active{cursor:grabbing}
+
+  /* ── Reordenar categorias ── */
+  .reorder-hint{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.4}
+  .reorder-list{display:flex;flex-direction:column;gap:8px}
+  .reorder-row{
+    display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:8px 10px;
+  }
+  .reorder-row.dragging{
+    position:relative;z-index:50;box-shadow:0 20px 40px -14px rgba(0,0,0,.6);opacity:.92;
+    user-select:none;-webkit-user-select:none;
+  }
+  .reorder-row-label{flex:1;font-weight:700;font-size:14px;color:var(--ink)}
 
   .card-add{
     border:2px dashed var(--border);border-radius:var(--radius);background:transparent;
@@ -144,11 +165,11 @@
   .empty{text-align:center;padding:40px 20px;color:var(--ink-faint);font-size:14px}
 
   /* ── Modal ── */
-  #modal-overlay{
+  #modal-overlay,#reorder-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;
     align-items:flex-start;justify-content:center;padding:26px 16px;overflow-y:auto;
   }
-  #modal-overlay.show{display:flex}
+  #modal-overlay.show,#reorder-overlay.show{display:flex}
   .modal{
     background:var(--app-bg);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:420px;
     box-shadow:0 24px 60px -20px rgba(0,0,0,.6);
@@ -158,14 +179,31 @@
   .modal-close{font-size:20px;color:var(--ink-faint);padding:4px 8px}
   .modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
   .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
-  .field input[type=text],.field input[type=number],.field textarea{
+  .field input[type=text],.field input[type=number],.field textarea,.field select{
     width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);
-    color:var(--ink);padding:10px 12px;font-size:14px;outline:none;
+    color:var(--ink);padding:10px 12px;font-size:14px;outline:none;font-family:inherit;
   }
-  .field input:focus,.field textarea:focus{border-color:var(--orange)}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--orange)}
   .field textarea{resize:vertical;min-height:64px}
-  .field-row{display:flex;gap:10px}
-  .field-row .field{flex:1}
+  .field label small{font-weight:400;color:var(--ink-faint);text-transform:none;letter-spacing:0}
+
+  /* ── Buscador de recomendados ── */
+  .rec-picker{
+    max-height:190px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);
+    margin-top:8px;background:var(--card);
+  }
+  .rec-group-label{
+    padding:7px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--ink-faint);background:var(--app-bg);position:sticky;top:0;
+  }
+  .rec-row{
+    display:flex;align-items:center;gap:9px;padding:8px 12px;font-size:13px;cursor:pointer;
+    border-top:1px solid var(--border);
+  }
+  .rec-row input{width:16px;height:16px;accent-color:var(--orange);flex-shrink:0}
+  .rec-empty{padding:14px;text-align:center;color:var(--ink-faint);font-size:12.5px}
+  .field-row{display:flex;gap:10px;flex-wrap:wrap}
+  .field-row .field{flex:1;min-width:120px}
   .photo-field{display:flex;align-items:center;gap:12px}
   .photo-preview{
     width:64px;height:64px;border-radius:var(--radius-sm);background:var(--card-2);
@@ -204,6 +242,7 @@
       <div class="brand">Painel do Cardápio<small id="user-email"></small></div>
       <div class="topbar-actions">
         <a class="link-ghost" href="../index.html" target="_blank" rel="noopener">Ver cardápio</a>
+        <button class="link-ghost" id="btn-reorder-cats">Reordenar categorias</button>
         <button class="link-ghost" id="btn-logout">Sair</button>
       </div>
     </header>
@@ -235,6 +274,23 @@
     </div>
   </div>
 
+  <div id="reorder-overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>Reordenar categorias</h2>
+        <button class="modal-close" id="reorder-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="reorder-hint">Arraste pelo ⠿ pra mudar a ordem em que as categorias aparecem no cardápio.</p>
+        <div class="reorder-list" id="reorder-list"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-outline" id="reorder-cancel">Cancelar</button>
+        <button class="btn-primary" id="reorder-save" disabled>Salvar ordem</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
 <script>
@@ -246,25 +302,35 @@
   // não leva /repos/dono/nome/, só /contents/<caminho>. Ver github.com/netlify/git-gateway/blob/master/api/github.go
   const API_BASE = `/.netlify/git/github/contents/`;
 
+  // Nenhuma categoria da DeuFome tem variação de preço (P/G) hoje — todas usam
+  // preço único (item.price). Se um dia precisar, é só adicionar "variants:[...]"
+  // na categoria, igual ao padrão usado no cardápio de outros clientes.
   const CATEGORIES = [
-    { key:"jantinhas", label:"Jantinhas", file:"site/data/jantinhas.json", singular:"jantinha",
-      priceFields:[{key:"price",label:"Preço"}] },
-    { key:"espetinhos", label:"Espetinhos", file:"site/data/espetinhos.json", singular:"espetinho",
-      priceFields:[{key:"price",label:"Preço"}] },
-    { key:"omeletes", label:"Omeletes", file:"site/data/omeletes.json", singular:"omelete",
-      priceFields:[{key:"price",label:"Preço"}] },
-    { key:"macarrao", label:"Macarrão na Chapa", file:"site/data/macarrao.json", singular:"macarrão",
-      priceFields:[{key:"price",label:"Preço"}] },
-    { key:"sobremesas", label:"Sobremesas", file:"site/data/sobremesas.json", singular:"sobremesa",
-      priceFields:[{key:"price",label:"Preço"}] },
-    { key:"bebidas", label:"Bebidas", file:"site/data/bebidas.json", singular:"bebida",
-      priceFields:[{key:"price",label:"Preço"}] },
+    { key:"jantinhas", label:"Jantinhas", file:"site/data/jantinhas.json", singular:"jantinha" },
+    { key:"espetinhos", label:"Espetinhos", file:"site/data/espetinhos.json", singular:"espetinho" },
+    { key:"omeletes", label:"Omeletes", file:"site/data/omeletes.json", singular:"omelete" },
+    { key:"macarrao", label:"Macarrão na Chapa", file:"site/data/macarrao.json", singular:"macarrão" },
+    { key:"sobremesas", label:"Sobremesas", file:"site/data/sobremesas.json", singular:"sobremesa" },
+    { key:"bebidas", label:"Bebidas", file:"site/data/bebidas.json", singular:"bebida" },
+    { key:"adicionais", label:"Adicionais", file:"site/data/adicionais.json", singular:"adicional" },
   ];
+
+  const TAG_LABELS = {
+    "mais-vendido": "Mais vendido",
+    "novidade": "Novidade",
+    "picante": "Picante",
+    "favorito": "Preferido da casa",
+  };
+
+  const CATEGORIAS_ORDER_FILE = "site/data/categorias.json";
 
   const state = {
     activeCat: CATEGORIES[0].key,
     data: {},        // key -> { items:[...], sha:'...', loaded:bool, dirty:bool }
-    editing: null,   // { catKey, index|null, item:{...}, photoDataUrl|null, removePhoto:bool }
+    editing: null,   // { catKey, index|null, item:{...}, photoFile|null, removePhoto:bool }
+    categoryOrder: CATEGORIES.map(c=>c.key), // ordem das abas/categorias — sobrescrita por categorias.json
+    categoryOrderSha: null,
+    categoryOrderDirty: false,
   };
 
   // ── Helpers ──
@@ -331,7 +397,7 @@
   async function uploadImage(file){
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const filename = Date.now() + "-" + slugify(file.name.replace(/\.[^.]+$/,"")) + "." + ext;
-    const path = "site/imagens/cardapio/uploads/" + filename;
+    const path = "site/imagens/uploads/" + filename;
     const dataUrl = await readFileAsDataURL(file);
     const base64 = dataUrl.split(",")[1];
     const res = await ghFetch(path, {
@@ -339,7 +405,7 @@
       body: JSON.stringify({ message: "admin: upload " + filename, branch: BRANCH, content: base64 })
     });
     if(!res.ok) throw new Error("Falha ao enviar a foto (" + res.status + ")");
-    return "/imagens/cardapio/uploads/" + filename;
+    return "/imagens/uploads/" + filename;
   }
 
   // ── Data loading ──
@@ -364,6 +430,79 @@
     return Promise.resolve();
   }
 
+  // Ordem das categorias/abas — vem de site/data/categorias.json, editável na tela de reordenar
+  async function loadCategoryOrder(){
+    try{
+      const { content, sha } = await getFile(CATEGORIAS_ORDER_FILE);
+      const parsed = JSON.parse(content);
+      const validKeys = CATEGORIES.map(c=>c.key);
+      const order = (Array.isArray(parsed.order) ? parsed.order : []).filter(k=>validKeys.includes(k));
+      validKeys.forEach(k=>{ if(!order.includes(k)) order.push(k); });
+      state.categoryOrder = order;
+      state.categoryOrderSha = sha;
+    }catch(err){
+      console.error("Erro ao carregar " + CATEGORIAS_ORDER_FILE, err);
+    }
+    renderTabs();
+  }
+
+  // Carrega uma categoria sem mexer no status bar/render da aba ativa — usado pelo
+  // buscador de "produtos recomendados", que precisa do catálogo inteiro em segundo plano.
+  async function loadCategoryQuiet(key){
+    if(state.data[key] && state.data[key].loaded) return;
+    const cat = catByKey(key);
+    try{
+      const { content, sha } = await getFile(cat.file);
+      const parsed = JSON.parse(content);
+      state.data[key] = { items: parsed.items || [], sha, loaded:true, dirty:false };
+    }catch(err){
+      console.error("Erro ao carregar " + cat.file + " (recomendados)", err);
+    }
+  }
+
+  function ensureAllCategoriesLoaded(){
+    return Promise.all(CATEGORIES.map(c=>loadCategoryQuiet(c.key)));
+  }
+
+  function renderRecPicker(filter){
+    const listEl = document.getElementById("f-rec-list");
+    if(!listEl || !state.editing) return;
+    const ed = state.editing;
+    const q = (filter||"").trim().toLowerCase();
+    let html = "";
+    CATEGORIES.forEach(cat=>{
+      const d = state.data[cat.key];
+      if(!d || !d.loaded) return;
+      const items = d.items.filter(it=>{
+        if(cat.key===ed.catKey && it.name===ed.item.name) return false;
+        if(!it.name) return false;
+        return !q || it.name.toLowerCase().includes(q);
+      });
+      if(items.length===0) return;
+      html += `<div class="rec-group-label">${escapeHtml(cat.label)}</div>`;
+      items.forEach(it=>{
+        const checked = ed.item.recommended.some(r=>r.category===cat.key && r.name===it.name) ? "checked" : "";
+        html += `<label class="rec-row">
+          <input type="checkbox" data-cat="${escapeAttr(cat.key)}" data-name="${escapeAttr(it.name)}" ${checked} />
+          <span>${escapeHtml(it.name)}</span>
+        </label>`;
+      });
+    });
+    listEl.innerHTML = html || '<div class="rec-empty">Nenhum produto encontrado.</div>';
+    listEl.querySelectorAll("input[type=checkbox]").forEach(cb=>{
+      cb.addEventListener("change", ()=>{
+        const category = cb.dataset.cat, name = cb.dataset.name;
+        if(cb.checked){
+          if(!ed.item.recommended.some(r=>r.category===category && r.name===name)){
+            ed.item.recommended.push({category, name});
+          }
+        } else {
+          ed.item.recommended = ed.item.recommended.filter(r=>!(r.category===category && r.name===name));
+        }
+      });
+    });
+  }
+
   // ── Status/UI ──
   function setStatus(kind, text){
     const el = document.getElementById("status");
@@ -384,10 +523,14 @@
     else if(state.data[state.activeCat] && state.data[state.activeCat].loaded) setStatus("ok","Tudo salvo");
   }
 
+  function orderedCategories(){
+    return state.categoryOrder.map(key=>catByKey(key)).filter(Boolean);
+  }
+
   function renderTabs(){
     const tabs = document.getElementById("tabs");
     tabs.innerHTML = "";
-    CATEGORIES.forEach(cat=>{
+    orderedCategories().forEach(cat=>{
       const btn = document.createElement("button");
       btn.className = "tab" + (cat.key===state.activeCat ? " active" : "");
       const count = state.data[cat.key] ? state.data[cat.key].items.length : null;
@@ -413,23 +556,25 @@
     d.items.forEach((item, idx)=>{
       const card = document.createElement("div");
       card.className = "card";
-      const priceLine = cat.priceFields.map(pf=>{
-        const v = item[pf.key];
-        return v!=null && v!=="" ? "R$" + Number(v).toFixed(2).replace(".",",") : null;
-      }).filter(Boolean).join(" / ");
+      card.dataset.idx = idx;
+      const priceStr = item.price!=null && item.price!=="" ? "R$" + Number(item.price).toFixed(2).replace(".",",") : "";
+      const tagHTML = item.tag && TAG_LABELS[item.tag] ? `<div class="card-price">${TAG_LABELS[item.tag]}</div>` : "";
       card.innerHTML = `
         <div class="card-photo">${item.image ? `<img src="../${item.image.replace(/^\//,"")}" alt="">` : "sem foto"}</div>
         <div class="card-body">
           <h3>${escapeHtml(item.name||"(sem nome)")}</h3>
           <p>${escapeHtml(item.desc||"")}</p>
-          <div class="card-price">${priceLine||""}</div>
+          <div class="card-price">${priceStr}</div>
+          ${tagHTML}
         </div>
         <div class="card-actions">
+          <button class="icon-btn drag-handle" title="Arrastar pra reordenar">⠿</button>
           <button class="icon-btn edit">Editar</button>
           <button class="icon-btn danger del">Excluir</button>
         </div>`;
       card.querySelector(".edit").addEventListener("click", ()=>openModal(state.activeCat, idx));
       card.querySelector(".del").addEventListener("click", ()=>deleteItem(state.activeCat, idx));
+      card.querySelector(".drag-handle").addEventListener("pointerdown", (e)=>startDrag(e, state.activeCat, card));
       grid.appendChild(card);
     });
 
@@ -452,6 +597,65 @@
     return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
 
+  // ── Reordenar arrastando (ordem = posição no card = ordem de exibição no cardápio) ──
+  let dragCtx = null;
+
+  function startDrag(e, catKey, card){
+    e.preventDefault();
+    const handle = e.currentTarget;
+    handle.setPointerCapture(e.pointerId);
+    dragCtx = { catKey, card, startX: e.clientX, startY: e.clientY, pointerId: e.pointerId };
+    card.classList.add("dragging");
+    handle.addEventListener("pointermove", onDragMove);
+    handle.addEventListener("pointerup", onDragEnd);
+    handle.addEventListener("pointercancel", onDragEnd);
+  }
+
+  function onDragMove(e){
+    if(!dragCtx || e.pointerId!==dragCtx.pointerId) return;
+    const { card } = dragCtx;
+    const dx = e.clientX - dragCtx.startX;
+    const dy = e.clientY - dragCtx.startY;
+    card.style.transform = `translate(${dx}px, ${dy}px)`;
+    card.style.pointerEvents = "none";
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    card.style.pointerEvents = "";
+    const targetCard = under && under.closest(".card");
+    if(targetCard && targetCard!==card && targetCard.parentElement===card.parentElement){
+      const grid = card.parentElement;
+      const cards = Array.from(grid.querySelectorAll(".card"));
+      const cardPos = cards.indexOf(card);
+      const targetPos = cards.indexOf(targetCard);
+      if(targetPos < cardPos) grid.insertBefore(card, targetCard);
+      else grid.insertBefore(card, targetCard.nextSibling);
+      // reancora o arrasto na nova posição pra não "pular" ao trocar de lugar
+      dragCtx.startX = e.clientX;
+      dragCtx.startY = e.clientY;
+      card.style.transform = "translate(0px,0px)";
+    }
+  }
+
+  function onDragEnd(e){
+    if(!dragCtx || e.pointerId!==dragCtx.pointerId) return;
+    const { catKey, card } = dragCtx;
+    const handle = e.currentTarget;
+    handle.removeEventListener("pointermove", onDragMove);
+    handle.removeEventListener("pointerup", onDragEnd);
+    handle.removeEventListener("pointercancel", onDragEnd);
+    card.classList.remove("dragging");
+    card.style.transform = "";
+    const grid = card.parentElement;
+    const d = state.data[catKey];
+    const newOrder = Array.from(grid.querySelectorAll(".card"))
+      .map(c => d.items[parseInt(c.dataset.idx, 10)]);
+    if(newOrder.length===d.items.length){
+      d.items = newOrder;
+      d.dirty = true;
+    }
+    dragCtx = null;
+    render();
+  }
+
   function deleteItem(catKey, idx){
     const d = state.data[catKey];
     const item = d.items[idx];
@@ -464,8 +668,9 @@
   // ── Modal ──
   function openModal(catKey, idx){
     const cat = catByKey(catKey);
-    const item = idx!=null ? Object.assign({}, state.data[catKey].items[idx]) : { name:"", desc:"", image:"" };
-    cat.priceFields.forEach(pf=>{ if(item[pf.key]==null) item[pf.key]=""; });
+    const item = idx!=null ? JSON.parse(JSON.stringify(state.data[catKey].items[idx])) : { name:"", desc:"", image:"" };
+    if(item.price==null) item.price = "";
+    item.recommended = item.recommended || [];
     state.editing = { catKey, idx, item, photoFile:null, removePhoto:false };
 
     document.getElementById("modal-title").textContent = idx!=null ? "Editar " + cat.singular : "Novo " + cat.singular;
@@ -474,11 +679,15 @@
       <div class="modal-error" id="modal-error" hidden></div>
       <div class="field"><label>Nome</label><input type="text" id="f-name" value="${escapeAttr(item.name)}" /></div>
       <div class="field"><label>Descrição</label><textarea id="f-desc">${escapeHtml(item.desc||"")}</textarea></div>
-      <div class="field-row">
-        ${cat.priceFields.map(pf=>`
-          <div class="field"><label>${pf.label}</label>
-            <input type="number" step="0.01" min="0" class="f-price" data-key="${pf.key}" value="${item[pf.key]}" />
-          </div>`).join("")}
+      <div class="field"><label>Preço</label>
+        <input type="number" step="0.01" min="0" class="f-price" value="${item.price}" />
+      </div>
+      <div class="field">
+        <label>Destaque</label>
+        <select id="f-tag">
+          <option value="">Nenhum</option>
+          ${Object.keys(TAG_LABELS).map(k=>`<option value="${k}" ${item.tag===k?"selected":""}>${TAG_LABELS[k]}</option>`).join("")}
+        </select>
       </div>
       <div class="field">
         <label>Foto</label>
@@ -489,7 +698,15 @@
             ${item.image ? `<button id="f-remove-photo">Remover foto</button>` : ""}
           </div>
         </div>
+      </div>
+      <div class="field">
+        <label>Produtos recomendados <small>(aparece como "Que tal também?" na tela do produto e no carrinho)</small></label>
+        <input type="text" id="f-rec-search" placeholder="Buscar produto..." />
+        <div class="rec-picker" id="f-rec-list">Carregando catálogo…</div>
       </div>`;
+
+    document.getElementById("f-rec-search").addEventListener("input", (e)=>renderRecPicker(e.target.value));
+    ensureAllCategoriesLoaded().then(()=>renderRecPicker(document.getElementById("f-rec-search").value));
 
     document.getElementById("f-photo").addEventListener("change", async (e)=>{
       const file = e.target.files[0];
@@ -527,15 +744,11 @@
 
     if(!name){ errEl.hidden=false; errEl.textContent = "Nome é obrigatório."; return; }
 
-    const prices = {};
-    for(const el of document.querySelectorAll(".f-price")){
-      const key = el.dataset.key;
-      const val = el.value.trim();
-      if(val===""){ errEl.hidden=false; errEl.textContent = "Preencha o preço."; return; }
-      const num = Number(val);
-      if(isNaN(num) || num < 0){ errEl.hidden=false; errEl.textContent = "Preço inválido."; return; }
-      prices[key] = num;
-    }
+    const priceEl = document.querySelector(".f-price");
+    const priceVal = priceEl.value.trim();
+    if(priceVal===""){ errEl.hidden=false; errEl.textContent = "Preencha o preço."; return; }
+    const price = Number(priceVal);
+    if(isNaN(price) || price < 0){ errEl.hidden=false; errEl.textContent = "Preço inválido."; return; }
 
     const saveBtn = document.getElementById("modal-save");
     saveBtn.disabled = true;
@@ -545,10 +758,11 @@
       if(ed.removePhoto) image = "";
       if(ed.photoFile) image = await uploadImage(ed.photoFile);
 
-      const newItem = Object.assign({ name, desc }, prices);
+      const newItem = { name, desc, price };
       if(image) newItem.image = image;
-      if(ed.item.recommended) newItem.recommended = ed.item.recommended;
-      if(ed.item.tag) newItem.tag = ed.item.tag;
+      const tag = document.getElementById("f-tag").value;
+      if(tag) newItem.tag = tag;
+      if(ed.item.recommended && ed.item.recommended.length) newItem.recommended = ed.item.recommended;
 
       const d = state.data[ed.catKey];
       if(ed.idx!=null) d.items[ed.idx] = newItem;
@@ -598,6 +812,113 @@
     loadCategory(state.activeCat);
   }
 
+  // ── Reordenar categorias (mesmo mecanismo de arrastar dos itens, numa lista à parte) ──
+  function renderReorderList(){
+    const list = document.getElementById("reorder-list");
+    list.innerHTML = "";
+    orderedCategories().forEach(cat=>{
+      const row = document.createElement("div");
+      row.className = "reorder-row";
+      row.dataset.key = cat.key;
+      row.innerHTML = `
+        <button class="icon-btn drag-handle" title="Arrastar pra reordenar">⠿</button>
+        <span class="reorder-row-label">${escapeHtml(cat.label)}</span>`;
+      row.querySelector(".drag-handle").addEventListener("pointerdown", (e)=>startCatDrag(e, row));
+      list.appendChild(row);
+    });
+  }
+
+  let categoryOrderBeforeEdit = null;
+
+  function openReorderModal(){
+    categoryOrderBeforeEdit = state.categoryOrder.slice();
+    renderReorderList();
+    document.getElementById("reorder-save").disabled = true;
+    document.getElementById("reorder-overlay").classList.add("show");
+  }
+
+  function closeReorderModal(){
+    if(state.categoryOrderDirty && categoryOrderBeforeEdit){
+      state.categoryOrder = categoryOrderBeforeEdit;
+      state.categoryOrderDirty = false;
+    }
+    document.getElementById("reorder-overlay").classList.remove("show");
+  }
+
+  let catDragCtx = null;
+
+  function startCatDrag(e, row){
+    e.preventDefault();
+    const handle = e.currentTarget;
+    handle.setPointerCapture(e.pointerId);
+    catDragCtx = { row, startX: e.clientX, startY: e.clientY, pointerId: e.pointerId };
+    row.classList.add("dragging");
+    handle.addEventListener("pointermove", onCatDragMove);
+    handle.addEventListener("pointerup", onCatDragEnd);
+    handle.addEventListener("pointercancel", onCatDragEnd);
+  }
+
+  function onCatDragMove(e){
+    if(!catDragCtx || e.pointerId!==catDragCtx.pointerId) return;
+    const { row } = catDragCtx;
+    const dx = e.clientX - catDragCtx.startX;
+    const dy = e.clientY - catDragCtx.startY;
+    row.style.transform = `translate(${dx}px, ${dy}px)`;
+    row.style.pointerEvents = "none";
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    row.style.pointerEvents = "";
+    const targetRow = under && under.closest(".reorder-row");
+    if(targetRow && targetRow!==row && targetRow.parentElement===row.parentElement){
+      const list = row.parentElement;
+      const rows = Array.from(list.querySelectorAll(".reorder-row"));
+      const rowPos = rows.indexOf(row);
+      const targetPos = rows.indexOf(targetRow);
+      if(targetPos < rowPos) list.insertBefore(row, targetRow);
+      else list.insertBefore(row, targetRow.nextSibling);
+      catDragCtx.startX = e.clientX;
+      catDragCtx.startY = e.clientY;
+      row.style.transform = "translate(0px,0px)";
+    }
+  }
+
+  function onCatDragEnd(e){
+    if(!catDragCtx || e.pointerId!==catDragCtx.pointerId) return;
+    const { row } = catDragCtx;
+    const handle = e.currentTarget;
+    handle.removeEventListener("pointermove", onCatDragMove);
+    handle.removeEventListener("pointerup", onCatDragEnd);
+    handle.removeEventListener("pointercancel", onCatDragEnd);
+    row.classList.remove("dragging");
+    row.style.transform = "";
+    const list = row.parentElement;
+    const newOrder = Array.from(list.querySelectorAll(".reorder-row")).map(r=>r.dataset.key);
+    state.categoryOrder = newOrder;
+    state.categoryOrderDirty = true;
+    document.getElementById("reorder-save").disabled = false;
+    catDragCtx = null;
+  }
+
+  async function saveCategoryOrder(){
+    if(!state.categoryOrderDirty) { closeReorderModal(); return; }
+    const btn = document.getElementById("reorder-save");
+    btn.disabled = true;
+    btn.textContent = "Salvando…";
+    try{
+      const content = JSON.stringify({ order: state.categoryOrder }, null, 2) + "\n";
+      const result = await putFile(CATEGORIAS_ORDER_FILE, content, state.categoryOrderSha, "admin: reordena categorias");
+      state.categoryOrderSha = result.content.sha;
+      state.categoryOrderDirty = false;
+      closeReorderModal();
+      renderTabs();
+      toast("Ordem das categorias salva! O cardápio publicado atualiza em 1–2 minutos.");
+    }catch(err){
+      toast(err.message, true);
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "Salvar ordem";
+    }
+  }
+
   window.addEventListener("beforeunload", (e)=>{
     if(currentDirty()){ e.preventDefault(); e.returnValue=""; }
   });
@@ -612,6 +933,14 @@
     if(e.target.id==="modal-overlay") closeModal();
   });
 
+  document.getElementById("btn-reorder-cats").addEventListener("click", openReorderModal);
+  document.getElementById("reorder-close").addEventListener("click", closeReorderModal);
+  document.getElementById("reorder-cancel").addEventListener("click", closeReorderModal);
+  document.getElementById("reorder-save").addEventListener("click", saveCategoryOrder);
+  document.getElementById("reorder-overlay").addEventListener("click", (e)=>{
+    if(e.target.id==="reorder-overlay") closeReorderModal();
+  });
+
   // ── Auth ──
   function showApp(user){
     document.getElementById("gate").style.display = "none";
@@ -619,6 +948,7 @@
     app.classList.add("show");
     document.getElementById("user-email").textContent = user.email || "";
     ensureLoaded(state.activeCat);
+    loadCategoryOrder();
   }
   function showGate(){
     document.getElementById("app").classList.remove("show");
