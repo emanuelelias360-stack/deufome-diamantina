@@ -1,6 +1,6 @@
 {
   "items": [
-    { "name": "Macarrão com Frango", "desc": "Frango, cebola, pimentão, milho e mussarela", "price": 22.90 },
-    { "name": "Macarrão Completo", "desc": "Carne mista, cebola, pimentão, tomate, milho e mussarela", "price": 27.90 }
+    { "name": "Macarrão com Frango", "desc": "Frango, cebola, pimentão, milho e mussarela", "price": 22.90, "recommended": [{"category":"bebidas","name":"Guaraná Antarctica 1L"},{"category":"sobremesas","name":"Mini Pudim"}] },
+    { "name": "Macarrão Completo", "desc": "Carne mista, cebola, pimentão, tomate, milho e mussarela", "price": 27.90, "recommended": [{"category":"bebidas","name":"Guaraná Antarctica 1L"},{"category":"sobremesas","name":"Mini Pudim"}] }
   ]
 }

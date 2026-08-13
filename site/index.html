@@ -183,6 +183,31 @@
   }
   .card-placeholder svg{opacity:.5}
 
+  /* ── Recommended product cards (product screen + cart) ── */
+  .ps-recommend-row,.cart-recommend-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+  .rec-card{
+    flex-shrink:0;width:112px;background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:9px;display:flex;flex-direction:column;gap:6px;cursor:pointer;
+  }
+  .rec-card-img-wrap{width:100%;aspect-ratio:4/3;background:var(--card-2);border-radius:8px;overflow:hidden;position:relative}
+  .rec-card-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .rec-card-img-wrap .card-placeholder{width:100%;height:100%}
+  .rec-card-img-wrap .card-placeholder svg{width:22px;height:22px}
+  .rec-card-name{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.25;min-height:28px}
+  .rec-card-footer{display:flex;align-items:center;justify-content:space-between}
+  .rec-card-price{font-size:11.5px;font-weight:700;color:var(--orange)}
+  .rec-card-btn{
+    width:24px;height:24px;border-radius:50%;background:var(--orange);color:#1a1006;font-size:15px;
+    display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;flex-shrink:0;
+    line-height:1;
+  }
+  .rec-card-btn:hover{background:var(--orange-strong)}
+  .cart-recommend{margin:14px 0 6px}
+  .cart-recommend-title{
+    font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:9px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+
   /* ── Cart FAB ── */
   .cart-fab{
     position:fixed;bottom:16px;
@@ -256,7 +281,7 @@
     font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;
   }
   .btn-whatsapp:hover{opacity:.92}
-  .btn-whatsapp:disabled{opacity:.45;cursor:not-allowed}
+  .btn-whatsapp:disabled,.btn-whatsapp.is-blocked{opacity:.45;cursor:not-allowed}
   .cart-hint{font-size:11px;color:var(--ink-faint);text-align:center;margin-top:10px;line-height:1.5}
 
   /* ── Product detail screen ── */
@@ -449,6 +474,10 @@
         </div>
         <textarea class="ps-obs-textarea" id="ps-obs-textarea" placeholder="Ex: sem cebola, ponto da carne..." maxlength="140"
           oninput="document.getElementById('ps-obs-count').textContent=this.value.length+'/140'"></textarea>
+        <div id="ps-recommend-section" style="display:none;margin-top:20px">
+          <div class="ps-obs-label"><span>Que tal também?</span></div>
+          <div class="ps-recommend-row" id="ps-recommend-row"></div>
+        </div>
       </div>
     </div>
     <div class="ps-bottom">
@@ -495,8 +524,12 @@
 // CONFIG
 // ────────────────────────────────────────
 const WHATS_NUMBER = '5538997328753';
+const DELIVERY_FEE = 6;
 
 function fmt(n){ return 'R$'+n.toFixed(2).replace('.',','); }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
 
 // ────────────────────────────────────────
 // DATA — carregada de arquivos JSON em /data (editáveis pelo painel /admin,
@@ -517,11 +550,32 @@ async function loadJSON(path){
 // Converte item vindo do CMS (price_p/price_g ou price) pro formato interno
 function normalizeItem(raw, prefix, index){
   const id = prefix + '-' + (raw.name ? slugify(raw.name) : index);
-  const base = {id, name: raw.name, desc: raw.desc || '', img: raw.image || undefined};
+  const base = {
+    id, name: raw.name, desc: raw.desc || '', img: raw.image || undefined,
+    recommended: raw.recommended || undefined
+  };
   if(raw.price_p !== undefined && raw.price_g !== undefined){
     return {...base, prices: {'P': Number(raw.price_p), 'G': Number(raw.price_g)}};
   }
   return {...base, price: Number(raw.price)};
+}
+
+// Preço "a partir de" (menor variação) ou preço único — usado nos cards de recomendado
+function baseItemPrice(item){
+  return item.prices ? Math.min(...Object.values(item.prices)) : item.price;
+}
+
+// ────────────────────────────────────────
+// RECOMENDAÇÕES (sugestão pra aumentar o ticket médio)
+// ────────────────────────────────────────
+// categoria (chave curta) -> itens normalizados, alimentado pelo initCategory de cada seção
+const CATALOG = {};
+
+function findCatalogItem(category, name){
+  const items = CATALOG[category];
+  if(!items) return null;
+  const target = (name||'').trim().toLowerCase();
+  return items.find(i => i.name.trim().toLowerCase() === target) || null;
 }
 
 // ────────────────────────────────────────
@@ -552,7 +606,9 @@ function priceLabel(item){
 
 function buildCards(containerId, items){
   const el = document.getElementById(containerId);
-  items.forEach(item => registerProduct(containerId+'__'+item.id, item));
+  const catKey = containerId.replace(/-grid$/,'');
+  items.forEach(item => { item._catKey = catKey; registerProduct(containerId+'__'+item.id, item); });
+  CATALOG[catKey] = items;
   el.innerHTML = items.map(item => {
     const imgSrc = item.img || '';
     const imgHTML = imgSrc
@@ -599,9 +655,55 @@ function openProduct(product){
   document.getElementById('ps-scroll').scrollTop = 0;
   document.getElementById('ps-qty-num').textContent = '1';
 
+  renderPsRecommend();
   psUpdatePrice();
   document.getElementById('product-screen').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function renderPsRecommend(){
+  const section = document.getElementById('ps-recommend-section');
+  const row = document.getElementById('ps-recommend-row');
+  const recs = (psProduct.recommended||[])
+    .map(r => findCatalogItem(r.category, r.name))
+    .filter(Boolean);
+  if(recs.length===0){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  row.innerHTML = recs.map(recCardHTML).join('');
+}
+
+// Card compacto (com foto) usado nas duas listas de recomendado — produto e carrinho
+function recCardHTML(item){
+  const nameHTML = escapeHtml(item.name);
+  const imgHTML = item.img
+    ? `<img src="${escapeHtml(item.img)}" alt="${nameHTML}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy" />${foodPlaceholderSVG()}`
+    : foodPlaceholderSVG().replace('style="display:none"','style="display:flex"');
+  const key = item._catKey + '-grid__' + item.id;
+  return `
+    <div class="rec-card" onclick="openProductById('${key}')">
+      <div class="rec-card-img-wrap">${imgHTML}</div>
+      <div class="rec-card-name">${nameHTML}</div>
+      <div class="rec-card-footer">
+        <span class="rec-card-price">${fmt(baseItemPrice(item))}</span>
+        <button class="rec-card-btn" onclick="event.stopPropagation();quickAddToCart('${item._catKey}','${item.id}')" aria-label="Adicionar ${nameHTML}">+</button>
+      </div>
+    </div>`;
+}
+
+// Adiciona um item recomendado direto no carrinho (qty 1, sem abrir tela de detalhe)
+function quickAddToCart(catKey, itemId){
+  const item = (CATALOG[catKey]||[]).find(i=>i.id===itemId);
+  if(!item) return;
+  const price = baseItemPrice(item);
+  const existing = cart.find(c=>c.id===item.id && !c.obs);
+  if(existing){ existing.qty += 1; }
+  else { cart.push({id:item.id, name:item.name, price, qty:1}); }
+  renderCart();
+  updateBadge();
+  showToast(item.name);
 }
 
 function closeProduct(){
@@ -644,19 +746,33 @@ function psAddToCart(){
 // TOAST
 // ────────────────────────────────────────
 let _toastTimer = null;
-function showToast(name){
+function showToastText(msg){
   const toast = document.getElementById('toast');
   const text  = document.getElementById('toast-text');
-  text.textContent = name + ' adicionado!';
+  text.textContent = msg;
   toast.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+function showToast(name){
+  showToastText(name + ' adicionado!');
 }
 
 // ────────────────────────────────────────
 // CART
 // ────────────────────────────────────────
 let cart = [];
+
+// Lembra nome/endereço do cliente entre visitas (sem backend, só localStorage)
+const CUSTOMER_KEY = 'deufome_customer';
+function getSavedCustomer(){
+  try{ return JSON.parse(localStorage.getItem(CUSTOMER_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveCustomer(patch){
+  const data = Object.assign(getSavedCustomer(), patch);
+  localStorage.setItem(CUSTOMER_KEY, JSON.stringify(data));
+}
 
 function updateBadge(){
   const total = cart.reduce((s,c)=>s+c.qty,0);
@@ -674,6 +790,26 @@ function changeQty(idx, delta){
   updateBadge();
 }
 
+// Junta os "recommended" dos itens já no carrinho, ignora o que já está lá, no máx 2 sugestões
+function cartRecommendations(){
+  const cartNames = new Set(cart.map(c=>c.name));
+  const seen = new Set();
+  const out = [];
+  for(const c of cart){
+    let source = null;
+    for(const key in CATALOG){ source = CATALOG[key].find(i=>i.name===c.name); if(source) break; }
+    if(!source || !source.recommended) continue;
+    for(const r of source.recommended){
+      const item = findCatalogItem(r.category, r.name);
+      if(!item || cartNames.has(item.name) || seen.has(item.name)) continue;
+      seen.add(item.name);
+      out.push(item);
+      if(out.length>=2) return out;
+    }
+  }
+  return out;
+}
+
 function renderCart(){
   const el = document.getElementById('cart-body');
   if(cart.length===0){
@@ -684,8 +820,8 @@ function renderCart(){
   const itemsHTML = cart.map((c,idx)=>`
     <div class="cart-item">
       <div class="cart-item-info">
-        <div class="cart-item-name">${c.name}</div>
-        ${c.obs?`<div class="cart-item-obs">"${c.obs}"</div>`:''}
+        <div class="cart-item-name">${escapeHtml(c.name)}</div>
+        ${c.obs?`<div class="cart-item-obs">"${escapeHtml(c.obs)}"</div>`:''}
       </div>
       <div class="cart-qty">
         <button class="qty-btn" onclick="changeQty(${idx},-1)" aria-label="Remover um">−</button>
@@ -695,11 +831,29 @@ function renderCart(){
       <span class="cart-item-price">${fmt(c.price*c.qty)}</span>
     </div>`).join('');
 
+  const recs = cartRecommendations();
+  const recommendHTML = recs.length ? `
+    <div class="cart-recommend">
+      <div class="cart-recommend-title">Complete seu pedido</div>
+      <div class="cart-recommend-row">
+        ${recs.map(recCardHTML).join('')}
+      </div>
+    </div>` : '';
+
   el.innerHTML = `
     ${itemsHTML}
+    ${recommendHTML}
+    <div class="cart-total" id="cart-subtotal-row" style="display:none">
+      <span class="cart-total-label" style="font-size:12.5px">Subtotal</span>
+      <span class="cart-total-value" style="font-size:15px" id="cart-subtotal-value"></span>
+    </div>
+    <div class="cart-total" id="cart-fee-row" style="display:none">
+      <span class="cart-total-label" style="font-size:12.5px">Taxa de entrega</span>
+      <span class="cart-total-value" style="font-size:15px" id="cart-fee-value"></span>
+    </div>
     <div class="cart-total">
       <span class="cart-total-label">Total</span>
-      <span class="cart-total-value">${fmt(total)}</span>
+      <span class="cart-total-value" id="cart-total-value">${fmt(total)}</span>
     </div>
 
     <div class="field-group">
@@ -711,7 +865,7 @@ function renderCart(){
       <span class="field-label">Como vai receber?</span>
       <div class="delivery-toggle">
         <button type="button" class="delivery-opt active" id="opt-retirada" onclick="setDelivery('retirada')">Retirar no local</button>
-        <button type="button" class="delivery-opt" id="opt-entrega" onclick="setDelivery('entrega')">Entrega (+R$6)</button>
+        <button type="button" class="delivery-opt" id="opt-entrega" onclick="setDelivery('entrega')">Entrega</button>
       </div>
       <div id="address-field" class="field-group" style="margin-top:10px">
         <label class="field-label" for="cart-address-input">Endereço completo</label>
@@ -719,12 +873,47 @@ function renderCart(){
       </div>
     </div>
 
-    <button onclick="sendWhatsApp()" class="btn-whatsapp">
+    <div class="field-group">
+      <span class="field-label">Forma de pagamento</span>
+      <div class="delivery-toggle">
+        <button type="button" class="delivery-opt" id="opt-dinheiro" onclick="setPayment('dinheiro')">Dinheiro</button>
+        <button type="button" class="delivery-opt" id="opt-cartao" onclick="setPayment('cartao')">Cartão</button>
+        <button type="button" class="delivery-opt" id="opt-pix" onclick="setPayment('pix')">Pix</button>
+      </div>
+    </div>
+
+    <button onclick="sendWhatsApp()" class="btn-whatsapp is-blocked" id="send-order-btn">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Enviar Pedido pelo WhatsApp
     </button>
-    <p class="cart-hint">O pedido é enviado pronto pro WhatsApp — a DeuFome confirma o valor da entrega (se houver) e forma de pagamento por lá.</p>
+    <p class="cart-hint">Preencha nome, endereço (se for entrega) e forma de pagamento pra liberar o envio. O pedido já vai pronto pro WhatsApp — vocês confirmam disponibilidade e valor da entrega por lá.</p>
   `;
+
+  const saved = getSavedCustomer();
+  const nameInput = document.getElementById('cart-name-input');
+  const addressInput = document.getElementById('cart-address-input');
+  nameInput.value = saved.name || '';
+  addressInput.value = saved.address || '';
+  nameInput.addEventListener('input', ()=>{ saveCustomer({name:nameInput.value}); updateSendButtonState(); });
+  addressInput.addEventListener('input', ()=>{ saveCustomer({address:addressInput.value}); updateSendButtonState(); });
+  setDelivery(saved.deliveryMode || 'retirada');
+  setPayment(saved.paymentMethod || null);
+}
+
+function cartSubtotal(){ return cart.reduce((s,c)=>s+c.price*c.qty,0); }
+
+function updateCartTotalDisplay(){
+  const subtotalEl = document.getElementById('cart-subtotal-value');
+  const feeEl = document.getElementById('cart-fee-value');
+  const totalEl = document.getElementById('cart-total-value');
+  if(!totalEl) return; // sacola vazia, sem total renderizado
+  const subtotal = cartSubtotal();
+  const showFee = deliveryMode === 'entrega';
+  document.getElementById('cart-subtotal-row').style.display = showFee ? 'flex' : 'none';
+  document.getElementById('cart-fee-row').style.display = showFee ? 'flex' : 'none';
+  if(subtotalEl) subtotalEl.textContent = fmt(subtotal);
+  if(feeEl) feeEl.textContent = fmt(DELIVERY_FEE);
+  totalEl.textContent = fmt(subtotal + (showFee ? DELIVERY_FEE : 0));
 }
 
 let deliveryMode = 'retirada';
@@ -733,11 +922,46 @@ function setDelivery(mode){
   document.getElementById('opt-retirada').classList.toggle('active', mode==='retirada');
   document.getElementById('opt-entrega').classList.toggle('active', mode==='entrega');
   document.getElementById('address-field').style.display = mode==='entrega' ? 'block' : 'none';
+  saveCustomer({deliveryMode: mode});
+  updateCartTotalDisplay();
+  updateSendButtonState();
+}
+
+let paymentMethod = null;
+function setPayment(method){
+  paymentMethod = method;
+  ['dinheiro','cartao','pix'].forEach(m=>{
+    document.getElementById('opt-'+m).classList.toggle('active', m===method);
+  });
+  if(method) saveCustomer({paymentMethod: method});
+  updateSendButtonState();
+}
+
+// Retorna o motivo de não poder finalizar (null se estiver tudo certo)
+function missingFieldMessage(){
+  const name = (document.getElementById('cart-name-input').value || '').trim();
+  if(!name) return 'Falta preencher seu nome.';
+  if(deliveryMode==='entrega'){
+    const address = (document.getElementById('cart-address-input').value || '').trim();
+    if(!address) return 'Falta o endereço de entrega.';
+  }
+  if(!paymentMethod) return 'Escolhe a forma de pagamento.';
+  return null;
+}
+
+function updateSendButtonState(){
+  const btn = document.getElementById('send-order-btn');
+  if(!btn) return;
+  btn.classList.toggle('is-blocked', !!missingFieldMessage());
 }
 
 function sendWhatsApp(){
   if(cart.length === 0) return;
-  const total = cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const missing = missingFieldMessage();
+  if(missing){ showToastText(missing); return; }
+  const subtotal = cartSubtotal();
+  const fee = deliveryMode==='entrega' ? DELIVERY_FEE : 0;
+  const total = subtotal + fee;
   const clientName = (document.getElementById('cart-name-input').value || '').trim();
   const address = deliveryMode==='entrega' ? (document.getElementById('cart-address-input').value || '').trim() : '';
 
@@ -752,10 +976,17 @@ function sendWhatsApp(){
   }).join('\n');
 
   const deliveryMsg = deliveryMode==='entrega'
-    ? `Entrega (+R$6,00 de taxa)\nEndereço: ${address || '(vou informar)'}`
+    ? `Entrega (+ taxa de entrega ${fmt(DELIVERY_FEE)})\nEndereço: ${address || '(vou informar)'}`
     : 'Retirada no local';
 
-  const msg = greeting + '\n\n' + itemsMsg + `\n\n*Total: ${fmt(total)}*` + '\n\n' + deliveryMsg;
+  const PAYMENT_LABELS = {dinheiro:'Dinheiro', cartao:'Cartão', pix:'Pix'};
+  const paymentMsg = 'Pagamento: ' + (PAYMENT_LABELS[paymentMethod] || '(vou informar)');
+
+  const totalMsg = fee>0
+    ? `Subtotal: ${fmt(subtotal)}\nTaxa de entrega: ${fmt(fee)}\n*Total: ${fmt(total)}*`
+    : `*Total: ${fmt(total)}*`;
+
+  const msg = greeting + '\n\n' + itemsMsg + '\n\n' + totalMsg + '\n\n' + deliveryMsg + '\n' + paymentMsg;
   window.open('https://wa.me/'+WHATS_NUMBER+'?text=' + encodeURIComponent(msg), '_blank');
 }
 
