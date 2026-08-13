@@ -12,16 +12,17 @@
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --dark:#0d0a08;
-    --app-bg:#14100c;
-    --card:#211a14;
-    --card-2:#2a2119;
-    --border:#3a2c1f;
-    --orange:#f2891f;
-    --orange-strong:#ff5a1f;
-    --gold:#e8b34a;
-    --ink:#f5ece0;
-    --ink-soft:#c9bba9;
-    --ink-faint:#8f8072;
+    --app-bg:#FFF6EA;
+    --card:#ffffff;
+    --card-2:#FBE7CE;
+    --border:#F0DDC0;
+    --orange:#E8720C;
+    --orange-strong:#C85D08;
+    --gold:#F0B23D;
+    --gold-dark:#A9720A;
+    --ink:#2A1A10;
+    --ink-soft:#6B5645;
+    --ink-faint:#9A8874;
     --whatsapp:#25D366;
     --radius:16px;
     --radius-sm:10px;
@@ -70,7 +71,7 @@
     border-bottom:1px solid var(--border);
   }
   .header-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-  .header-brand span{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .header-brand span{font-family:'Poppins',sans-serif;font-weight:800;font-size:16px;color:#f5ece0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .header-search-btn{
     width:36px;height:36px;border-radius:50%;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
@@ -104,7 +105,7 @@
     overflow:hidden;
   }
   .banner-title{
-    font-size:26px;font-weight:900;color:var(--ink);
+    font-size:26px;font-weight:900;color:#f5ece0;
     letter-spacing:.01em;margin-bottom:4px;position:relative;z-index:1;
   }
   .banner-sub{
@@ -123,8 +124,8 @@
   .status-dot.open{background:#3fb56b;box-shadow:0 0 0 0 rgba(63,181,107,.6);animation:pulse 2s infinite}
   .status-dot.closed{background:#c15a45}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,181,107,.55)}50%{box-shadow:0 0 0 6px rgba(63,181,107,0)}}
-  .status-text.open{color:#4fcf82}
-  .status-text.closed{color:#e07a5f}
+  .status-text.open{color:#2f7a4a}
+  .status-text.closed{color:#a8432f}
   .status-hours{color:var(--ink-faint);font-weight:400}
 
   /* ── Category dropdown selector ── */
@@ -249,7 +250,7 @@
   .cart-item-info{flex:1;min-width:0}
   .cart-item-name{font-size:13.5px;font-weight:700;color:var(--ink)}
   .cart-item-variation{font-size:11.5px;color:var(--ink-faint);margin-top:1px}
-  .cart-item-obs{font-size:11px;color:var(--gold);margin-top:2px;font-style:italic}
+  .cart-item-obs{font-size:11px;color:var(--gold-dark);margin-top:2px;font-style:italic}
   .cart-qty{display:flex;align-items:center;gap:9px;flex-shrink:0}
   .qty-btn{
     width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--card);
@@ -339,7 +340,7 @@
   .ps-addon-row:last-child{border-bottom:none}
   .ps-addon-row input{width:18px;height:18px;accent-color:var(--orange);flex-shrink:0;cursor:pointer}
   .ps-addon-name{flex:1;font-size:13.5px;color:var(--ink)}
-  .ps-addon-price{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
+  .ps-addon-price{font-size:13px;font-weight:700;color:var(--gold-dark);white-space:nowrap}
 
   .ps-bottom{
     position:absolute;bottom:0;left:0;right:0;background:var(--app-bg);border-top:1px solid var(--border);
@@ -363,8 +364,8 @@
   /* ── Toast ── */
   .toast{
     position:fixed;top:calc(var(--header-h) + 12px);left:50%;transform:translateX(-50%) translateY(-20px);
-    z-index:90;background:var(--card);border:1px solid var(--border);border-radius:50px;padding:10px 18px;
-    display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ink);
+    z-index:90;background:var(--dark);border-radius:50px;padding:10px 18px;
+    display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#f5ece0;
     white-space:nowrap;max-width:calc(480px - 32px);box-shadow:0 10px 28px -10px rgba(0,0,0,.6);
     opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
   }
@@ -374,7 +375,7 @@
   /* ── Footer ── */
   .footer{padding:34px 20px 90px;text-align:center}
   .footer-logo{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:8px}
-  .footer-ig{font-size:12.5px;font-weight:700;color:var(--gold)}
+  .footer-ig{font-size:12.5px;font-weight:700;color:var(--gold-dark)}
   .footer-copy{font-size:11px;color:var(--ink-faint);margin-top:10px}
 
   ::-webkit-scrollbar{width:4px}
@@ -497,7 +498,7 @@
       <div class="ps-img-wrap">
         <img id="ps-img" alt="" style="display:none" />
         <div class="ps-img-placeholder" id="ps-placeholder" style="display:none">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#e8b34a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M4 12l1-4h14l1 4"/><path d="M8 8V6a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M12 5V2"/></svg>
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#A9720A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M4 12l1-4h14l1 4"/><path d="M8 8V6a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M12 5V2"/></svg>
         </div>
       </div>
       <div class="ps-body">
@@ -648,7 +649,7 @@ function findCatalogItem(category, name){
 // ────────────────────────────────────────
 function foodPlaceholderSVG(){
   return `<div class="card-placeholder" aria-hidden="true" style="display:none">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e8b34a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#A9720A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 12h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M4 12l1-4h14l1 4"/><path d="M8 8V6a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M12 5V2"/>
     </svg>
   </div>`;
