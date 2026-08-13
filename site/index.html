@@ -25,7 +25,6 @@
     --whatsapp:#25D366;
     --radius:16px;
     --radius-sm:10px;
-    --nav-h:64px;
     --header-h:60px;
     --shadow:0 14px 34px -18px rgba(0,0,0,.65);
   }
@@ -47,7 +46,7 @@
     max-width:480px;
     min-height:100vh;
     position:relative;
-    padding-bottom:calc(var(--nav-h) + 18px);
+    padding-bottom:24px;
   }
 
   /* ── Logo badge (CSS, sem arquivo de imagem) ── */
@@ -128,19 +127,22 @@
   .status-text.closed{color:#e07a5f}
   .status-hours{color:var(--ink-faint);font-weight:400}
 
-  /* ── Category chips ── */
-  .chip-scroll{
-    display:flex;gap:8px;padding:14px 16px 4px;overflow-x:auto;
-    scrollbar-width:none;
+  /* ── Category dropdown selector ── */
+  .cat-select-wrap{
+    padding:14px 16px 10px;
+    position:sticky;top:var(--header-h);z-index:45;
+    background:var(--app-bg);
+    box-shadow:0 8px 12px -10px rgba(0,0,0,.4);
   }
-  .chip-scroll::-webkit-scrollbar{display:none}
-  .chip-nav{
-    flex-shrink:0;padding:8px 16px;border-radius:100px;
-    background:var(--card);border:1px solid var(--border);
-    font-size:12.5px;font-weight:700;color:var(--ink-soft);
-    white-space:nowrap;cursor:pointer;transition:all .2s;
+  .cat-select{
+    width:100%;appearance:none;-webkit-appearance:none;
+    background:var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23f2891f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right 14px center;
+    background-size:18px;
+    border:1.5px solid var(--border);border-radius:100px;
+    padding:12px 40px 12px 18px;
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);
+    cursor:pointer;
   }
-  .chip-nav.active{background:var(--orange);border-color:var(--orange);color:#1a1006}
 
   /* ── Section ── */
   .section{padding:26px 16px 6px}
@@ -150,24 +152,18 @@
   }
   .section-desc{font-size:12.5px;color:var(--ink-faint);margin-bottom:16px;line-height:1.5}
 
-  /* ── Product cards grid ── */
-  .cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  /* ── Product list cards (imagem à direita) ── */
+  .list-cards{display:flex;flex-direction:column;gap:10px}
   .card{
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
-    overflow:hidden;cursor:pointer;display:flex;flex-direction:column;position:relative;
-    transition:border-color .2s, box-shadow .2s, transform .15s;
+    overflow:hidden;cursor:pointer;display:flex;align-items:stretch;position:relative;
+    transition:border-color .2s, box-shadow .2s;
   }
   .card:hover,.card:active{border-color:var(--orange);box-shadow:var(--shadow)}
-  .card-img{width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--card-2)}
-  .card-placeholder{
-    width:100%;aspect-ratio:4/3;background:var(--card-2);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  }
-  .card-placeholder svg{opacity:.55}
-  .card-placeholder-name{font-size:10px;color:var(--ink-faint);text-align:center;padding:0 10px;font-weight:600}
-  .card-body{padding:11px 12px 12px;flex:1;display:flex;flex-direction:column}
-  .card-name{font-size:14px;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:3px}
-  .card-desc{font-size:11px;color:var(--ink-faint);line-height:1.5;flex:1;margin-bottom:8px}
+  .card-body{padding:12px 12px 12px 14px;flex:1;display:flex;flex-direction:column;min-width:0}
+  .card-name{font-size:14.5px;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:3px}
+  .card-desc{font-size:11.5px;color:var(--ink-faint);line-height:1.5;flex:1;margin-bottom:8px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;gap:6px}
   .card-price{font-size:14px;font-weight:700;color:var(--orange)}
   .card-price small{font-size:10px;font-weight:600;color:var(--ink-faint)}
@@ -179,27 +175,17 @@
   }
   .btn-add:hover{background:var(--orange-strong);transform:scale(1.08)}
   .btn-add:active{transform:scale(.95)}
-
-  /* ── Bottom nav ── */
-  .bottom-nav{
-    position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-    width:100%;max-width:480px;z-index:50;height:var(--nav-h);
-    background:var(--dark);display:flex;align-items:stretch;
-    border-top:1px solid var(--border);
-    box-shadow:0 -6px 24px -10px rgba(0,0,0,.5);
+  .card-img-wrap{width:92px;flex-shrink:0;background:var(--card-2)}
+  .card-img{width:100%;height:100%;object-fit:cover}
+  .card-placeholder{
+    width:100%;height:100%;background:var(--card-2);
+    display:flex;align-items:center;justify-content:center;
   }
-  .nav-item{
-    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    background:none;border:none;color:rgba(245,236,224,.5);
-    font-family:'Inter',sans-serif;font-size:9px;font-weight:600;
-    cursor:pointer;padding:6px 2px;-webkit-tap-highlight-color:transparent;transition:color .2s;
-  }
-  .nav-item.active,.nav-item:hover{color:var(--orange)}
-  .nav-item span{white-space:nowrap}
+  .card-placeholder svg{opacity:.5}
 
   /* ── Cart FAB ── */
   .cart-fab{
-    position:fixed;bottom:calc(var(--nav-h) + 16px);
+    position:fixed;bottom:16px;
     right:max(16px, calc(50% - 480px/2 + 16px));z-index:40;
     width:56px;height:56px;border-radius:50%;background:var(--orange);
     border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -332,7 +318,7 @@
   .toast-icon{width:20px;height:20px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
   /* ── Footer ── */
-  .footer{padding:34px 20px 8px;text-align:center}
+  .footer{padding:34px 20px 90px;text-align:center}
   .footer-logo{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:8px}
   .footer-ig{font-size:12.5px;font-weight:700;color:var(--gold)}
   .footer-copy{font-size:11px;color:var(--ink-faint);margin-top:10px}
@@ -377,56 +363,58 @@
     <span class="status-hours" id="status-hours"></span>
   </div>
 
-  <!-- Quick category chips -->
-  <div class="chip-scroll" id="chip-scroll">
-    <button class="chip-nav active" onclick="navScrollTo('sec-jantinhas',this)">Jantinhas</button>
-    <button class="chip-nav" onclick="navScrollTo('sec-espetinhos',this)">Espetinhos</button>
-    <button class="chip-nav" onclick="navScrollTo('sec-omeletes',this)">Omeletes</button>
-    <button class="chip-nav" onclick="navScrollTo('sec-macarrao',this)">Macarrão</button>
-    <button class="chip-nav" onclick="navScrollTo('sec-sobremesas',this)">Sobremesas</button>
-    <button class="chip-nav" onclick="navScrollTo('sec-bebidas',this)">Bebidas</button>
+  <!-- Category dropdown selector -->
+  <div class="cat-select-wrap">
+    <select class="cat-select" id="cat-select" onchange="navScrollTo(this.value)">
+      <option value="sec-jantinhas">Jantinhas</option>
+      <option value="sec-espetinhos">Espetinhos</option>
+      <option value="sec-omeletes">Omeletes</option>
+      <option value="sec-macarrao">Macarrão na Chapa</option>
+      <option value="sec-sobremesas">Sobremesas</option>
+      <option value="sec-bebidas">Bebidas</option>
+    </select>
   </div>
 
   <!-- ══════════ JANTINHA COM ESPETO ══════════ -->
   <section id="sec-jantinhas" class="section">
     <h2 class="section-title">Jantinha com Espeto</h2>
     <p class="section-desc">Toda jantinha já acompanha o espetinho.</p>
-    <div class="cards-grid" id="jantinhas-grid"></div>
+    <div class="list-cards" id="jantinhas-grid"></div>
   </section>
 
   <!-- ══════════ ESPETINHO AVULSO ══════════ -->
   <section id="sec-espetinhos" class="section">
     <h2 class="section-title">Espetinho Avulso</h2>
     <p class="section-desc">Pra quem quer só o espetinho, sem o prato.</p>
-    <div class="cards-grid" id="espetinhos-grid"></div>
+    <div class="list-cards" id="espetinhos-grid"></div>
   </section>
 
   <!-- ══════════ OMELETE ══════════ -->
   <section id="sec-omeletes" class="section">
     <h2 class="section-title">Omelete</h2>
     <p class="section-desc"></p>
-    <div class="cards-grid" id="omeletes-grid"></div>
+    <div class="list-cards" id="omeletes-grid"></div>
   </section>
 
   <!-- ══════════ MACARRÃO NA CHAPA ══════════ -->
   <section id="sec-macarrao" class="section">
     <h2 class="section-title">Macarrão na Chapa</h2>
     <p class="section-desc"></p>
-    <div class="cards-grid" id="macarrao-grid"></div>
+    <div class="list-cards" id="macarrao-grid"></div>
   </section>
 
   <!-- ══════════ SOBREMESAS ══════════ -->
   <section id="sec-sobremesas" class="section">
     <h2 class="section-title">Sobremesas</h2>
     <p class="section-desc">Pequenas delícias pra fechar o pedido.</p>
-    <div class="cards-grid" id="sobremesas-grid"></div>
+    <div class="list-cards" id="sobremesas-grid"></div>
   </section>
 
   <!-- ══════════ BEBIDAS ══════════ -->
   <section id="sec-bebidas" class="section">
     <h2 class="section-title">Bebidas</h2>
     <p class="section-desc"></p>
-    <div class="cards-grid" id="bebidas-grid"></div>
+    <div class="list-cards" id="bebidas-grid"></div>
   </section>
 
   <!-- Footer -->
@@ -500,34 +488,6 @@
     </div>
   </div>
 
-  <!-- Bottom Nav -->
-  <nav class="bottom-nav" aria-label="Categorias do cardápio">
-    <button class="nav-item active" onclick="navScrollTo('sec-jantinhas',this,true)" aria-label="Jantinhas">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>
-      <span>Jantinha</span>
-    </button>
-    <button class="nav-item" onclick="navScrollTo('sec-espetinhos',this,true)" aria-label="Espetinhos">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="8" cy="16" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="16" cy="8" r="1.6"/></svg>
-      <span>Espetinho</span>
-    </button>
-    <button class="nav-item" onclick="navScrollTo('sec-omeletes',this,true)" aria-label="Omeletes">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="13" rx="8" ry="6"/><circle cx="12" cy="12" r="2.4"/></svg>
-      <span>Omelete</span>
-    </button>
-    <button class="nav-item" onclick="navScrollTo('sec-macarrao',this,true)" aria-label="Macarrão">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0118 0"/><path d="M3 12h18v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2z"/><path d="M8 12V8M12 12V7M16 12V8"/></svg>
-      <span>Macarrão</span>
-    </button>
-    <button class="nav-item" onclick="navScrollTo('sec-sobremesas',this,true)" aria-label="Sobremesas">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1112 0c0 4-2 8-6 11-4-3-6-7-6-11z"/></svg>
-      <span>Doces</span>
-    </button>
-    <button class="nav-item" onclick="navScrollTo('sec-bebidas',this,true)" aria-label="Bebidas">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l-1 6.5a5 5 0 01-8 0L7 3z"/><path d="M9.5 9.5L8 21h8l-1.5-11.5"/><path d="M6 3h12"/></svg>
-      <span>Bebidas</span>
-    </button>
-  </nav>
-
 </div>
 
 <script>
@@ -567,12 +527,11 @@ function normalizeItem(raw, prefix, index){
 // ────────────────────────────────────────
 // PLACEHOLDER (evita img quebrada)
 // ────────────────────────────────────────
-function foodPlaceholderSVG(name){
+function foodPlaceholderSVG(){
   return `<div class="card-placeholder" aria-hidden="true" style="display:none">
-    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#e8b34a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e8b34a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M4 12h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M4 12l1-4h14l1 4"/><path d="M8 8V6a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M12 5V2"/>
     </svg>
-    <span class="card-placeholder-name">${name}</span>
   </div>`;
 }
 
@@ -597,11 +556,10 @@ function buildCards(containerId, items){
   el.innerHTML = items.map(item => {
     const imgSrc = item.img || '';
     const imgHTML = imgSrc
-      ? `<img class="card-img" src="${imgSrc}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy" />${foodPlaceholderSVG(item.name)}`
-      : foodPlaceholderSVG(item.name).replace('style="display:none"','style="display:flex"');
+      ? `<img class="card-img" src="${imgSrc}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy" />${foodPlaceholderSVG()}`
+      : foodPlaceholderSVG().replace('style="display:none"','style="display:flex"');
     return `
     <div class="card" onclick="openProductById('${containerId}__${item.id}')">
-      ${imgHTML}
       <div class="card-body">
         <div class="card-name">${item.name}</div>
         <div class="card-desc">${item.desc||''}</div>
@@ -610,6 +568,7 @@ function buildCards(containerId, items){
           <button class="btn-add" onclick="event.stopPropagation();openProductById('${containerId}__${item.id}')" aria-label="Adicionar ${item.name}">+</button>
         </div>
       </div>
+      <div class="card-img-wrap">${imgHTML}</div>
     </div>`;
   }).join('');
 }
@@ -810,34 +769,31 @@ function toggleCart(){
 }
 
 // ────────────────────────────────────────
-// NAV SCROLL
+// NAV SCROLL (dropdown de categorias)
 // ────────────────────────────────────────
-function navScrollTo(sectionId, btn, isBottomNav){
+function stickyOffset(){
+  const headerH = document.querySelector('.header').offsetHeight;
+  const catWrapH = document.querySelector('.cat-select-wrap').offsetHeight;
+  return headerH + catWrapH;
+}
+
+function navScrollTo(sectionId){
   const el = document.getElementById(sectionId);
   if(!el) return;
-  const headerH = document.querySelector('.header').offsetHeight;
-  const y = el.getBoundingClientRect().top + window.scrollY - headerH - 8;
+  const y = el.getBoundingClientRect().top + window.scrollY - stickyOffset() - 8;
   window.scrollTo({top:y, behavior:'smooth'});
-
-  const selector = isBottomNav ? '.nav-item' : '.chip-nav';
-  document.querySelectorAll(selector).forEach(n=>n.classList.remove('active'));
-  btn.classList.add('active');
 }
 
 const NAV_SECTIONS = ['jantinhas','espetinhos','omeletes','macarrao','sobremesas','bebidas'];
 window.addEventListener('scroll', ()=>{
-  const headerH = document.querySelector('.header').offsetHeight;
+  const offset = stickyOffset();
   let current = NAV_SECTIONS[0];
   NAV_SECTIONS.forEach(s=>{
     const el = document.getElementById('sec-'+s);
-    if(el && el.getBoundingClientRect().top - headerH - 40 <= 0) current = s;
+    if(el && el.getBoundingClientRect().top - offset - 40 <= 0) current = s;
   });
-  document.querySelectorAll('.nav-item').forEach((btn,i)=>{
-    btn.classList.toggle('active', NAV_SECTIONS[i]===current);
-  });
-  document.querySelectorAll('.chip-nav').forEach((btn,i)=>{
-    btn.classList.toggle('active', NAV_SECTIONS[i]===current);
-  });
+  const select = document.getElementById('cat-select');
+  if(select.value !== 'sec-'+current) select.value = 'sec-'+current;
 }, {passive:true});
 
 // ────────────────────────────────────────
@@ -891,8 +847,11 @@ async function initCategory(jsonPath, containerId, categoryLabel){
     buildCards(containerId, items);
   } catch(err){
     console.error('Erro ao carregar '+jsonPath, err);
-    el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--ink-faint);font-size:12.5px">
-      Não consegui carregar essa parte do cardápio agora. Chama a gente no WhatsApp pra ver o que tem disponível.
+    el.innerHTML = `<div class="card" style="cursor:default">
+      <div class="card-body">
+        <div class="card-name">Cardápio indisponível no momento</div>
+        <div class="card-desc">Não consegui carregar essa parte do cardápio agora. Chama a gente no WhatsApp pra ver o que tem disponível.</div>
+      </div>
     </div>`;
   }
 }
