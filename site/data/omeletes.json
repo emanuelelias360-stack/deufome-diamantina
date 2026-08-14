@@ -1,6 +1,6 @@
 {
   "items": [
     { "name": "Omelete Simples", "desc": "Ovo, queijo e presunto", "price": 16.90, "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mousse de Maracujá"}] },
-    { "name": "Omelete Completa", "desc": "Ovo, queijo, presunto, tomate e carne mista", "price": 21.90, "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mousse de Maracujá"}] }
+    { "name": "Omelete Completa", "desc": "Ovo, queijo, presunto, tomate e carne mista", "price": 21.90, "image": "/imagens/uploads/omelete-completa.jpg", "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mousse de Maracujá"}] }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "items": [
     { "name": "Espetinho de Frango ou Porco", "desc": "", "price": 6.90, "recommended": [{"category":"jantinhas","name":"Opção 1 — Arroz, Farofa e Espetinho"},{"category":"bebidas","name":"Pitchulinha"}] },
-    { "name": "Espetinho Misto", "desc": "Porco, frango e calabresa", "price": 7.90, "recommended": [{"category":"jantinhas","name":"Opção 1 — Arroz, Farofa e Espetinho"},{"category":"bebidas","name":"Pitchulinha"}] },
+    { "name": "Espetinho Misto", "desc": "Porco, frango e calabresa", "price": 7.90, "image": "/imagens/uploads/espetinho-misto.jpg", "recommended": [{"category":"jantinhas","name":"Opção 1 — Arroz, Farofa e Espetinho"},{"category":"bebidas","name":"Pitchulinha"}] },
     { "name": "Espetinho de Carne", "desc": "", "price": 8.90, "recommended": [{"category":"jantinhas","name":"Opção 1 — Arroz, Farofa e Espetinho"},{"category":"bebidas","name":"Pitchulinha"}] }
   ]
 }
