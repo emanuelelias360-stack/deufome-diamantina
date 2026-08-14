@@ -602,7 +602,8 @@ function normalizeItem(raw, prefix, index){
   const id = prefix + '-' + (raw.name ? slugify(raw.name) : index);
   const base = {
     id, name: raw.name, desc: raw.desc || '', img: raw.image || undefined,
-    tag: raw.tag || undefined, recommended: raw.recommended || undefined
+    tag: raw.tag || undefined, recommended: raw.recommended || undefined,
+    paused: raw.paused || false
   };
   if(raw.prices !== undefined){
     return {...base, prices: raw.prices};
@@ -678,9 +679,14 @@ function priceLabel(item){
 function buildCards(containerId, items){
   const el = document.getElementById(containerId);
   const catKey = containerId.replace(/-grid$/,'');
-  items.forEach(item => { item._catKey = catKey; registerProduct(containerId+'__'+item.id, item); });
-  CATALOG[catKey] = items;
-  el.innerHTML = items.map(item => {
+  const visibleItems = items.filter(item => !item.paused);
+  visibleItems.forEach(item => { item._catKey = catKey; registerProduct(containerId+'__'+item.id, item); });
+  CATALOG[catKey] = visibleItems;
+  if(visibleItems.length===0){
+    el.innerHTML = '<div class="card" style="cursor:default"><div class="card-body"><div class="card-name">Nada disponível aqui no momento</div></div></div>';
+    return;
+  }
+  el.innerHTML = visibleItems.map(item => {
     const imgSrc = item.img || '';
     const nameHTML = escapeHtml(item.name);
     const imgHTML = imgSrc

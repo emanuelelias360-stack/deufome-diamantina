@@ -129,6 +129,12 @@
   .card-body p{font-size:12.5px;color:var(--ink-soft);line-height:1.4;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card-price{font-family:'Poppins',sans-serif;font-weight:700;color:var(--gold-dark);font-size:13px;margin-top:auto;padding-top:4px;line-height:1.4}
+  .card.paused{opacity:.55}
+  .card-paused-badge{
+    align-self:flex-start;display:inline-block;background:#e8dccb;color:#7a5a2e;
+    font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+    padding:3px 8px;border-radius:100px;margin-bottom:5px;
+  }
   .card-actions{display:flex;gap:8px;padding:0 14px 14px}
   .icon-btn{
     flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
@@ -564,12 +570,14 @@
 
     d.items.forEach((item, idx)=>{
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = "card" + (item.paused ? " paused" : "");
       card.dataset.idx = idx;
       const tagHTML = item.tag && TAG_LABELS[item.tag] ? `<div class="card-price">${TAG_LABELS[item.tag]}</div>` : "";
+      const pausedHTML = item.paused ? `<div class="card-paused-badge">Pausado — some do cardápio</div>` : "";
       card.innerHTML = `
         <div class="card-photo">${item.image ? `<img src="../${item.image.replace(/^\//,"")}" alt="">` : "sem foto"}</div>
         <div class="card-body">
+          ${pausedHTML}
           <h3>${escapeHtml(item.name||"(sem nome)")}</h3>
           <p>${escapeHtml(item.desc||"")}</p>
           <div class="card-price">${priceLine(cat, item)}</div>
@@ -577,11 +585,13 @@
         </div>
         <div class="card-actions">
           <button class="icon-btn drag-handle" title="Arrastar pra reordenar">⠿</button>
+          <button class="icon-btn pause">${item.paused ? "Reativar" : "Pausar"}</button>
           <button class="icon-btn edit">Editar</button>
           <button class="icon-btn danger del">Excluir</button>
         </div>`;
       card.querySelector(".edit").addEventListener("click", ()=>openModal(state.activeCat, idx));
       card.querySelector(".del").addEventListener("click", ()=>deleteItem(state.activeCat, idx));
+      card.querySelector(".pause").addEventListener("click", ()=>togglePause(state.activeCat, idx));
       card.querySelector(".drag-handle").addEventListener("pointerdown", (e)=>startDrag(e, state.activeCat, card));
       grid.appendChild(card);
     });
@@ -661,6 +671,14 @@
       d.dirty = true;
     }
     dragCtx = null;
+    render();
+  }
+
+  function togglePause(catKey, idx){
+    const d = state.data[catKey];
+    const item = d.items[idx];
+    item.paused = !item.paused;
+    d.dirty = true;
     render();
   }
 
@@ -798,6 +816,7 @@
       const tag = document.getElementById("f-tag").value;
       if(tag) newItem.tag = tag;
       if(ed.item.recommended && ed.item.recommended.length) newItem.recommended = ed.item.recommended;
+      if(ed.item.paused) newItem.paused = true;
 
       const d = state.data[ed.catKey];
       if(ed.idx!=null) d.items[ed.idx] = newItem;
