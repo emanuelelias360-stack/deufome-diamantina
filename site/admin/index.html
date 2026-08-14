@@ -135,7 +135,9 @@
     font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;
     padding:3px 8px;border-radius:100px;margin-bottom:5px;
   }
-  .card-actions{display:flex;gap:8px;padding:0 14px 14px}
+  .card-actions{display:flex;gap:8px;padding:0 14px}
+  .card-actions:first-of-type{margin-bottom:8px}
+  .card-actions:last-of-type{padding-bottom:14px}
   .icon-btn{
     flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
     padding:8px;border-radius:var(--radius-sm);border:1px solid var(--border);
@@ -586,6 +588,8 @@
         <div class="card-actions">
           <button class="icon-btn drag-handle" title="Arrastar pra reordenar">⠿</button>
           <button class="icon-btn pause">${item.paused ? "Reativar" : "Pausar"}</button>
+        </div>
+        <div class="card-actions">
           <button class="icon-btn edit">Editar</button>
           <button class="icon-btn danger del">Excluir</button>
         </div>`;
