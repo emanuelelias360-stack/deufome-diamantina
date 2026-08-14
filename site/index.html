@@ -604,8 +604,8 @@ function normalizeItem(raw, prefix, index){
     id, name: raw.name, desc: raw.desc || '', img: raw.image || undefined,
     tag: raw.tag || undefined, recommended: raw.recommended || undefined
   };
-  if(raw.price_p !== undefined && raw.price_g !== undefined){
-    return {...base, prices: {'P': Number(raw.price_p), 'G': Number(raw.price_g)}};
+  if(raw.prices !== undefined){
+    return {...base, prices: raw.prices};
   }
   return {...base, price: Number(raw.price)};
 }
@@ -668,7 +668,9 @@ function openProductById(key){ const item = _productRegistry[key]; if(item) open
 function priceLabel(item){
   if(item.prices){
     const vals = Object.values(item.prices);
-    return `<small>A partir de</small><br>${fmt(Math.min(...vals))}`;
+    const min = Math.min(...vals), max = Math.max(...vals);
+    if(min !== max) return `<small>A partir de</small><br>${fmt(min)}`;
+    return fmt(min);
   }
   return fmt(item.price);
 }

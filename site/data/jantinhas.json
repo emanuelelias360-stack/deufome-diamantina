@@ -1,7 +1,7 @@
 {
   "items": [
-    { "name": "Opção 1 — Arroz, Farofa e Espetinho", "desc": "Arroz, farofa, vinagrete e espetinho (a jantinha acompanha o espeto)", "price": 24.90, "image": "/imagens/uploads/jantinha-opcao-1.jpg", "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] },
-    { "name": "Opção 2 — Arroz, Tropeiro e Espetinho", "desc": "Arroz, tropeiro, vinagrete e espetinho (a jantinha acompanha o espeto)", "price": 26.90, "image": "/imagens/uploads/jantinha-opcao-2.jpg", "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] },
-    { "name": "Opção 3 — Arroz, Omelete e Espetinho", "desc": "Arroz, omelete (ovo e queijo), vinagrete (a jantinha acompanha o espeto)", "price": 20.99, "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] }
+    { "name": "Opção 1 — Arroz, Farofa e Espetinho", "desc": "Arroz, farofa, vinagrete e espetinho (a jantinha acompanha o espeto)", "prices": {"Boi": 24.90, "Frango": 24.90, "Porco": 24.90, "Misto": 24.90}, "image": "/imagens/uploads/jantinha-opcao-1.jpg", "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] },
+    { "name": "Opção 2 — Arroz, Tropeiro e Espetinho", "desc": "Arroz, tropeiro, vinagrete e espetinho (a jantinha acompanha o espeto)", "prices": {"Boi": 26.90, "Frango": 26.90, "Porco": 26.90, "Misto": 26.90}, "image": "/imagens/uploads/jantinha-opcao-2.jpg", "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] },
+    { "name": "Opção 3 — Arroz, Omelete e Espetinho", "desc": "Arroz, omelete (ovo e queijo), vinagrete (a jantinha acompanha o espeto)", "prices": {"Boi": 20.99, "Frango": 20.99, "Porco": 20.99, "Misto": 20.99}, "recommended": [{"category":"bebidas","name":"Pitchulinha"},{"category":"sobremesas","name":"Mini Pudim"}] }
   ]
 }
