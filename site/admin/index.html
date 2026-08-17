@@ -150,6 +150,27 @@
   }
   .drag-handle:active{cursor:grabbing}
 
+  /* ── Almoço (marmitex por dia da semana) ── */
+  .almoco-box{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:16px;
+  }
+  .almoco-box h3{font-size:14px;margin-bottom:12px}
+  .chip-list{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    display:flex;align-items:center;gap:6px;background:var(--card-2);border:1px solid var(--border);
+    border-radius:999px;padding:6px 8px 6px 12px;font-size:12.5px;font-weight:600;color:var(--ink);
+  }
+  .chip button{color:var(--ink-faint);font-weight:700;font-size:14px;line-height:1;padding:2px}
+  .chip button:hover{color:#e07a5f}
+  .chip-add-row{display:flex;gap:8px;margin-top:10px}
+  .chip-add-row input{flex:1}
+  .addon-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .addon-row input[type=text]{flex:2}
+  .addon-row input[type=number]{flex:1}
+  .addon-row button{color:var(--ink-faint);font-weight:700;padding:8px;flex:0 0 auto}
+  .addon-row button:hover{color:#e07a5f}
+
   /* ── Reordenar categorias ── */
   .reorder-hint{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.4}
   .reorder-list{display:flex;flex-direction:column;gap:8px}
@@ -257,15 +278,71 @@
     </header>
 
     <main>
-      <div class="tabs" id="tabs"></div>
-      <div class="statusbar">
-        <div class="status" id="status"><span class="dot"></span><span id="status-text">Carregando…</span></div>
-        <div class="statusbar-actions">
-          <button class="btn-text" id="btn-discard" hidden>Descartar alterações</button>
-          <button class="btn-primary" id="btn-save" disabled>Salvar alterações</button>
+      <div class="tabs" id="top-tabs">
+        <button class="tab active" id="top-tab-cardapio">Cardápio</button>
+        <button class="tab" id="top-tab-almoco">Almoço</button>
+      </div>
+
+      <div id="cardapio-section">
+        <div class="tabs" id="tabs"></div>
+        <div class="statusbar">
+          <div class="status" id="status"><span class="dot"></span><span id="status-text">Carregando…</span></div>
+          <div class="statusbar-actions">
+            <button class="btn-text" id="btn-discard" hidden>Descartar alterações</button>
+            <button class="btn-primary" id="btn-save" disabled>Salvar alterações</button>
+          </div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <div id="almoco-section" style="display:none">
+        <div class="almoco-box">
+          <h3>Tamanhos e preços (todo dia)</h3>
+          <div class="field-row">
+            <div class="field"><label>Preço — 550ml</label><input type="number" step="0.01" min="0" id="almoco-size-550" /></div>
+            <div class="field"><label>Preço — 700ml</label><input type="number" step="0.01" min="0" id="almoco-size-700" /></div>
+          </div>
+        </div>
+
+        <div class="almoco-box">
+          <h3>Substituição vegetariana (todo dia)</h3>
+          <div class="chip-list" id="almoco-veg-list"></div>
+          <div class="chip-add-row">
+            <input type="text" id="almoco-veg-input" placeholder="Ex: Omelete (ovo + queijo)" />
+            <button class="btn-outline" id="almoco-veg-add">Adicionar</button>
+          </div>
+        </div>
+
+        <div class="tabs" id="almoco-day-tabs"></div>
+
+        <div class="almoco-box">
+          <h3>Pratos do dia</h3>
+          <div id="almoco-pratos"></div>
+        </div>
+
+        <div class="almoco-box">
+          <h3>Acompanhamentos</h3>
+          <div class="chip-list" id="almoco-acomp-list"></div>
+          <div class="chip-add-row">
+            <input type="text" id="almoco-acomp-input" placeholder="Ex: Arroz" />
+            <button class="btn-outline" id="almoco-acomp-add">Adicionar</button>
+          </div>
+        </div>
+
+        <div class="almoco-box">
+          <h3>Adicionais do dia</h3>
+          <div id="almoco-adicionais"></div>
+          <button class="btn-outline" id="almoco-adicional-add" style="margin-top:10px">+ Adicionar item</button>
+        </div>
+
+        <div class="statusbar">
+          <div class="status" id="almoco-status"><span class="dot"></span><span id="almoco-status-text">Carregando…</span></div>
+          <div class="statusbar-actions">
+            <button class="btn-text" id="almoco-btn-discard" hidden>Descartar alterações</button>
+            <button class="btn-primary" id="almoco-btn-save" disabled>Salvar alterações</button>
+          </div>
         </div>
       </div>
-      <div class="grid" id="grid"></div>
     </main>
   </div>
 
@@ -338,7 +415,14 @@
     categoryOrder: CATEGORIES.map(c=>c.key), // ordem das abas/categorias — sobrescrita por categorias.json
     categoryOrderSha: null,
     categoryOrderDirty: false,
+    almoco: { data:null, sha:null, loaded:false, dirty:false, activeDay:"segunda", pendingPhotos:{} },
   };
+
+  const ALMOCO_FILE = "site/data/almoco.json";
+  const ALMOCO_DAYS = [
+    { key:"segunda", label:"Segunda" }, { key:"terca", label:"Terça" }, { key:"quarta", label:"Quarta" },
+    { key:"quinta", label:"Quinta" }, { key:"sexta", label:"Sexta" }, { key:"sabado", label:"Sábado" }, { key:"domingo", label:"Domingo" },
+  ];
 
   // ── Helpers ──
   function catByKey(key){ return CATEGORIES.find(c=>c.key===key); }
@@ -977,8 +1061,259 @@
     }
   }
 
+  // ── Almoço (marmitex por dia da semana) ──
+  // Estrutura própria, não cabe na mecânica de CATEGORIES/openModal (que assume
+  // {items:[...]} endereçado por índice) — painel separado que reaproveita só as
+  // funções de baixo nível (ghFetch/getFile/putFile/uploadImage/toast/escapeHtml).
+  async function loadAlmoco(){
+    setAlmocoStatus("saving", "Carregando…");
+    try{
+      const { content, sha } = await getFile(ALMOCO_FILE);
+      const parsed = JSON.parse(content);
+      parsed.sizes = parsed.sizes || {};
+      parsed.vegetariana = parsed.vegetariana || [];
+      parsed.dias = parsed.dias || {};
+      ALMOCO_DAYS.forEach(d=>{
+        const day = parsed.dias[d.key] || {};
+        day.pratos = day.pratos || [];
+        day.acompanhamentos = day.acompanhamentos || [];
+        day.adicionais = day.adicionais || [];
+        parsed.dias[d.key] = day;
+      });
+      state.almoco = { data: parsed, sha, loaded:true, dirty:false, activeDay: state.almoco.activeDay, pendingPhotos:{} };
+      setAlmocoStatus("ok", "Tudo salvo");
+    }catch(err){
+      setAlmocoStatus("error", err.message);
+      toast(err.message, true);
+    }
+    renderAlmoco();
+  }
+
+  function ensureAlmocoLoaded(){
+    if(!state.almoco.loaded) return loadAlmoco();
+    renderAlmoco();
+    return Promise.resolve();
+  }
+
+  function markAlmocoDirty(){
+    state.almoco.dirty = true;
+    updateAlmocoStatusBar();
+  }
+
+  function setAlmocoStatus(kind, text){
+    const el = document.getElementById("almoco-status");
+    el.className = "status " + (kind==="dirty"?"dirty":kind==="saving"?"saving":kind==="error"?"error":"");
+    document.getElementById("almoco-status-text").textContent = text;
+  }
+
+  function updateAlmocoStatusBar(){
+    document.getElementById("almoco-btn-save").disabled = !state.almoco.dirty;
+    document.getElementById("almoco-btn-discard").hidden = !state.almoco.dirty;
+    if(state.almoco.dirty) setAlmocoStatus("dirty", "Alterações não salvas");
+    else if(state.almoco.loaded) setAlmocoStatus("ok", "Tudo salvo");
+  }
+
+  function activeAlmocoDay(){
+    return state.almoco.data.dias[state.almoco.activeDay];
+  }
+
+  function renderAlmoco(){
+    updateAlmocoStatusBar();
+    if(!state.almoco.loaded) return;
+    const d = state.almoco.data;
+    document.getElementById("almoco-size-550").value = d.sizes["550ml"] != null ? d.sizes["550ml"] : "";
+    document.getElementById("almoco-size-700").value = d.sizes["700ml"] != null ? d.sizes["700ml"] : "";
+    renderAlmocoVegList();
+    renderAlmocoDayTabs();
+    renderAlmocoPratos();
+    renderAlmocoAcompanhamentos();
+    renderAlmocoAdicionais();
+  }
+
+  function renderAlmocoDayTabs(){
+    const tabs = document.getElementById("almoco-day-tabs");
+    tabs.innerHTML = "";
+    ALMOCO_DAYS.forEach(day=>{
+      const btn = document.createElement("button");
+      btn.className = "tab" + (day.key===state.almoco.activeDay ? " active" : "");
+      btn.textContent = day.label;
+      btn.addEventListener("click", ()=>{ state.almoco.activeDay = day.key; renderAlmoco(); });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderAlmocoVegList(){
+    const list = document.getElementById("almoco-veg-list");
+    const veg = state.almoco.data.vegetariana;
+    list.innerHTML = veg.length
+      ? veg.map((v,i)=>`<span class="chip">${escapeHtml(v.name)}<button data-idx="${i}" title="Remover">&times;</button></span>`).join("")
+      : `<span style="color:var(--ink-faint);font-size:12.5px">Nenhuma opção cadastrada</span>`;
+    list.querySelectorAll("button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        veg.splice(Number(btn.dataset.idx),1);
+        markAlmocoDirty();
+        renderAlmocoVegList();
+      });
+    });
+  }
+
+  function renderAlmocoPratos(){
+    const wrap = document.getElementById("almoco-pratos");
+    const day = activeAlmocoDay();
+    while(day.pratos.length < 2) day.pratos.push({name:"", image:""});
+    wrap.innerHTML = day.pratos.map((prato,i)=>`
+      <div class="field-row" style="align-items:flex-end;margin-bottom:${i<day.pratos.length-1?"14px":"0"}">
+        <div class="field" style="flex:2">
+          <label>Prato ${i+1}</label>
+          <input type="text" class="almoco-prato-name" data-idx="${i}" value="${escapeAttr(prato.name)}" placeholder="Ex: Frango ao molho" />
+        </div>
+        <div class="field photo-field" style="flex:1">
+          <div class="photo-preview" id="almoco-prato-preview-${i}">${prato.image ? `<img src="../${prato.image.replace(/^\//,"")}" />` : "sem foto"}</div>
+          <div class="photo-actions">
+            <label>Trocar foto<input type="file" accept="image/*" class="almoco-prato-photo" data-idx="${i}" hidden /></label>
+          </div>
+        </div>
+      </div>`).join("");
+    wrap.querySelectorAll(".almoco-prato-name").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        day.pratos[Number(inp.dataset.idx)].name = inp.value;
+        markAlmocoDirty();
+      });
+    });
+    wrap.querySelectorAll(".almoco-prato-photo").forEach(inp=>{
+      inp.addEventListener("change", async (e)=>{
+        const idx = Number(inp.dataset.idx);
+        const file = e.target.files[0];
+        if(!file) return;
+        state.almoco.pendingPhotos[state.almoco.activeDay+"_"+idx] = file;
+        const dataUrl = await readFileAsDataURL(file);
+        document.getElementById("almoco-prato-preview-"+idx).innerHTML = `<img src="${dataUrl}" />`;
+        markAlmocoDirty();
+      });
+    });
+  }
+
+  function renderAlmocoAcompanhamentos(){
+    const list = document.getElementById("almoco-acomp-list");
+    const day = activeAlmocoDay();
+    list.innerHTML = day.acompanhamentos.length
+      ? day.acompanhamentos.map((name,i)=>`<span class="chip">${escapeHtml(name)}<button data-idx="${i}" title="Remover">&times;</button></span>`).join("")
+      : `<span style="color:var(--ink-faint);font-size:12.5px">Nenhum acompanhamento cadastrado</span>`;
+    list.querySelectorAll("button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        day.acompanhamentos.splice(Number(btn.dataset.idx),1);
+        markAlmocoDirty();
+        renderAlmocoAcompanhamentos();
+      });
+    });
+  }
+
+  function renderAlmocoAdicionais(){
+    const wrap = document.getElementById("almoco-adicionais");
+    const day = activeAlmocoDay();
+    wrap.innerHTML = day.adicionais.map((a,i)=>`
+      <div class="addon-row">
+        <input type="text" class="almoco-add-name" data-idx="${i}" value="${escapeAttr(a.name)}" placeholder="Nome" />
+        <input type="number" step="0.01" min="0" class="almoco-add-price" data-idx="${i}" value="${a.price}" placeholder="Preço" />
+        <button class="almoco-add-remove" data-idx="${i}" title="Remover">&times;</button>
+      </div>`).join("");
+    wrap.querySelectorAll(".almoco-add-name").forEach(inp=>{
+      inp.addEventListener("input", ()=>{ day.adicionais[Number(inp.dataset.idx)].name = inp.value; markAlmocoDirty(); });
+    });
+    wrap.querySelectorAll(".almoco-add-price").forEach(inp=>{
+      inp.addEventListener("input", ()=>{ day.adicionais[Number(inp.dataset.idx)].price = Number(inp.value)||0; markAlmocoDirty(); });
+    });
+    wrap.querySelectorAll(".almoco-add-remove").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        day.adicionais.splice(Number(btn.dataset.idx),1);
+        markAlmocoDirty();
+        renderAlmocoAdicionais();
+      });
+    });
+  }
+
+  async function saveAlmoco(){
+    if(!state.almoco.dirty) return;
+    const btn = document.getElementById("almoco-btn-save");
+    btn.disabled = true;
+    setAlmocoStatus("saving", "Salvando…");
+    try{
+      const pending = state.almoco.pendingPhotos;
+      for(const key of Object.keys(pending)){
+        const sep = key.lastIndexOf("_");
+        const dayKey = key.slice(0, sep), idx = Number(key.slice(sep+1));
+        const url = await uploadImage(pending[key]);
+        state.almoco.data.dias[dayKey].pratos[idx].image = url;
+      }
+      state.almoco.pendingPhotos = {};
+      const content = JSON.stringify(state.almoco.data, null, 2) + "\n";
+      const result = await putFile(ALMOCO_FILE, content, state.almoco.sha, "admin: atualiza almoço");
+      state.almoco.sha = result.content.sha;
+      state.almoco.dirty = false;
+      setAlmocoStatus("ok", "Tudo salvo — o site atualiza em 1–2 minutos");
+      toast("Almoço salvo! O cardápio publicado atualiza em 1–2 minutos.");
+    }catch(err){
+      if(String(err.message).includes("409")){
+        toast("Alguém salvou o almoço enquanto você editava. Recarregando os dados mais recentes…", true);
+        await loadAlmoco();
+      }else{
+        setAlmocoStatus("error", "Erro ao salvar");
+        toast(err.message, true);
+      }
+    }
+    renderAlmoco();
+  }
+
+  function discardAlmoco(){
+    if(!confirm("Descartar as alterações não salvas do almoço?")) return;
+    state.almoco.pendingPhotos = {};
+    loadAlmoco();
+  }
+
+  function showTopTab(which){
+    document.getElementById("top-tab-cardapio").classList.toggle("active", which==="cardapio");
+    document.getElementById("top-tab-almoco").classList.toggle("active", which==="almoco");
+    document.getElementById("cardapio-section").style.display = which==="cardapio" ? "" : "none";
+    document.getElementById("almoco-section").style.display = which==="almoco" ? "" : "none";
+    if(which==="almoco") ensureAlmocoLoaded();
+  }
+
+  document.getElementById("top-tab-cardapio").addEventListener("click", ()=>showTopTab("cardapio"));
+  document.getElementById("top-tab-almoco").addEventListener("click", ()=>showTopTab("almoco"));
+  document.getElementById("almoco-btn-save").addEventListener("click", saveAlmoco);
+  document.getElementById("almoco-btn-discard").addEventListener("click", discardAlmoco);
+  document.getElementById("almoco-size-550").addEventListener("input", (e)=>{
+    state.almoco.data.sizes["550ml"] = Number(e.target.value)||0; markAlmocoDirty();
+  });
+  document.getElementById("almoco-size-700").addEventListener("input", (e)=>{
+    state.almoco.data.sizes["700ml"] = Number(e.target.value)||0; markAlmocoDirty();
+  });
+  document.getElementById("almoco-veg-add").addEventListener("click", ()=>{
+    const inp = document.getElementById("almoco-veg-input");
+    const name = inp.value.trim();
+    if(!name) return;
+    state.almoco.data.vegetariana.push({name});
+    inp.value = "";
+    markAlmocoDirty();
+    renderAlmocoVegList();
+  });
+  document.getElementById("almoco-acomp-add").addEventListener("click", ()=>{
+    const inp = document.getElementById("almoco-acomp-input");
+    const name = inp.value.trim();
+    if(!name) return;
+    activeAlmocoDay().acompanhamentos.push(name);
+    inp.value = "";
+    markAlmocoDirty();
+    renderAlmocoAcompanhamentos();
+  });
+  document.getElementById("almoco-adicional-add").addEventListener("click", ()=>{
+    activeAlmocoDay().adicionais.push({name:"", price:0});
+    markAlmocoDirty();
+    renderAlmocoAdicionais();
+  });
+
   window.addEventListener("beforeunload", (e)=>{
-    if(currentDirty()){ e.preventDefault(); e.returnValue=""; }
+    if(currentDirty() || state.almoco.dirty){ e.preventDefault(); e.returnValue=""; }
   });
 
   // ── Wiring ──

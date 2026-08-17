@@ -424,6 +424,7 @@
   <!-- Category dropdown selector -->
   <div class="cat-select-wrap">
     <select class="cat-select" id="cat-select" onchange="navScrollTo(this.value)">
+      <option value="sec-almoco">Almoço</option>
       <option value="sec-jantinhas">Jantinhas</option>
       <option value="sec-espetinhos">Espetinhos</option>
       <option value="sec-omeletes">Omeletes</option>
@@ -433,6 +434,13 @@
       <option value="sec-adicionais">Adicionais</option>
     </select>
   </div>
+
+  <!-- ══════════ ALMOÇO (MARMITEX) ══════════ -->
+  <section id="sec-almoco" class="section">
+    <h2 class="section-title">Almoço</h2>
+    <p class="section-desc">Marmitex do dia — cardápio muda de segunda a domingo.</p>
+    <div class="list-cards" id="almoco-grid"></div>
+  </section>
 
   <!-- ══════════ JANTINHA COM ESPETO ══════════ -->
   <section id="sec-jantinhas" class="section">
@@ -511,6 +519,7 @@
           <div class="ps-size-label">Escolha uma opção</div>
           <div class="ps-size-tabs" id="ps-size-tabs"></div>
         </div>
+        <div id="ps-choice-section" style="display:none"></div>
         <div class="ps-desc" id="ps-desc"></div>
         <div id="ps-addons-section" style="display:none">
           <div class="ps-size-label">Adicionais (opcional)</div>
@@ -712,13 +721,15 @@ function buildCards(containerId, items){
 // ────────────────────────────────────────
 // PRODUCT DETAIL SCREEN
 // ────────────────────────────────────────
-let psProduct = null, psQty = 1, psSize = null, psAddons = [];
+let psProduct = null, psQty = 1, psSize = null, psAddons = [], psPrato = null, psVeg = null;
 
 function openProduct(product){
   psProduct = product;
   psQty = 1;
   psAddons = [];
   psSize = product.prices ? Object.keys(product.prices)[0] : null;
+  psPrato = product._almocoPratos ? product._almocoPratos[0].name : null;
+  psVeg = null;
 
   const img = document.getElementById('ps-img');
   const ph  = document.getElementById('ps-placeholder');
@@ -754,6 +765,7 @@ function openProduct(product){
     sizeSection.style.display = 'none';
   }
 
+  renderPsChoices();
   renderPsAddons();
   renderPsRecommend();
   psUpdatePrice();
@@ -761,15 +773,56 @@ function openProduct(product){
   document.body.style.overflow = 'hidden';
 }
 
+// Abas de escolha (prato do dia / substituição vegetariana) — não mexem em preço,
+// diferente das abas de tamanho (ps-size-tabs), que trocam psUpdatePrice().
+function renderPsChoices(){
+  const section = document.getElementById('ps-choice-section');
+  if(!psProduct._almocoPratos){
+    section.style.display = 'none';
+    section.innerHTML = '';
+    return;
+  }
+  section.style.display = 'block';
+  const pratosHTML = psProduct._almocoPratos.map(p =>
+    `<button type="button" class="ps-size-tab${p.name===psPrato?' active':''}" onclick="psSelectChoice('prato','${escapeHtml(p.name)}',this)">${escapeHtml(p.name)}</button>`
+  ).join('');
+  const vegHTML = (psProduct._almocoVeg||[]).map(v =>
+    `<button type="button" class="ps-size-tab${v.name===psVeg?' active':''}" onclick="psSelectChoice('veg','${escapeHtml(v.name)}',this)">${escapeHtml(v.name)}</button>`
+  ).join('');
+  section.innerHTML = `
+    <div class="ps-size-label">Escolha o prato</div>
+    <div class="ps-size-tabs">${pratosHTML}</div>
+    <div class="ps-size-label">Substituir por opção vegetariana (opcional)</div>
+    <div class="ps-size-tabs">
+      <button type="button" class="ps-size-tab${psVeg===null?' active':''}" onclick="psSelectChoice('veg',null,this)">Não substituir</button>
+      ${vegHTML}
+    </div>`;
+}
+
+function psSelectChoice(kind, value, btn){
+  if(kind==='prato') psPrato = value; else psVeg = value;
+  btn.closest('.ps-size-tabs').querySelectorAll('.ps-size-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Lista de adicionais do produto atual — usa a lista própria do dia (almoço) quando
+// existir, senão cai na lista global ADDONS (comportamento das outras categorias).
+function currentAddonList(){
+  return (psProduct._almocoAdicionais && psProduct._almocoAdicionais.length)
+    ? psProduct._almocoAdicionais.map((a,i)=>({id:'almoco-addon-'+i, name:a.name, price:Number(a.price)}))
+    : ADDONS;
+}
+
 function renderPsAddons(){
   const section = document.getElementById('ps-addons-section');
   const list = document.getElementById('ps-addons-list');
-  if(!ADDON_CATEGORIES.includes(psProduct._catKey) || ADDONS.length===0){
+  const addonList = currentAddonList();
+  if((!ADDON_CATEGORIES.includes(psProduct._catKey) && !psProduct._almocoAdicionais) || addonList.length===0){
     section.style.display = 'none';
     return;
   }
   section.style.display = 'block';
-  list.innerHTML = ADDONS.map(addon => `
+  list.innerHTML = addonList.map(addon => `
     <label class="ps-addon-row">
       <input type="checkbox" onchange="psToggleAddon('${addon.id}',this.checked)" />
       <span class="ps-addon-name">${escapeHtml(addon.name)}</span>
@@ -778,7 +831,7 @@ function renderPsAddons(){
 }
 
 function psToggleAddon(addonId, checked){
-  const addon = ADDONS.find(a=>a.id===addonId);
+  const addon = currentAddonList().find(a=>a.id===addonId);
   if(!addon) return;
   if(checked){ if(!psAddons.find(a=>a.id===addonId)) psAddons.push(addon); }
   else { psAddons = psAddons.filter(a=>a.id!==addonId); }
@@ -865,8 +918,13 @@ function psAddToCart(){
   const price = base + psAddonsTotal();
   const obs   = document.getElementById('ps-obs-textarea').value.trim();
   const addonsKey = psAddons.map(a=>a.id).sort().join(',');
-  const id    = psProduct.id + (psSize ? '_'+psSize : '') + (addonsKey ? '_'+addonsKey : '');
-  const name  = psProduct.name;
+  const choiceKey = (psPrato||'') + '|' + (psVeg||'');
+  const id    = psProduct.id + (psSize ? '_'+psSize : '') + (psProduct._almocoPratos ? '_'+slugify(choiceKey) : '') + (addonsKey ? '_'+addonsKey : '');
+  let name  = psProduct.name;
+  if(psProduct._almocoPratos){
+    name += ' — ' + (psVeg || psPrato);
+    if(psVeg) name += ' (subst. vegetariana)';
+  }
   const addonNames = psAddons.map(a=>a.name);
 
   const existing = cart.find(c=>c.id===id && c.obs===obs);
@@ -1158,7 +1216,7 @@ function navScrollTo(sectionId){
   window.scrollTo({top:y, behavior:'smooth'});
 }
 
-const CATEGORY_KEYS_DEFAULT = ['jantinhas','espetinhos','omeletes','macarrao','sobremesas','bebidas','adicionais'];
+const CATEGORY_KEYS_DEFAULT = ['almoco','jantinhas','espetinhos','omeletes','macarrao','sobremesas','bebidas','adicionais'];
 let NAV_SECTIONS = CATEGORY_KEYS_DEFAULT;
 
 // Lê a ordem das categorias de data/categorias.json (editável pelo painel /admin) e
@@ -1265,7 +1323,48 @@ async function initCategory(jsonPath, containerId, categoryLabel){
   }
 }
 
+// Monta um único card "Marmitex do dia" a partir de data/almoco.json, escolhendo
+// automaticamente o dia de hoje (index de Date.getDay(): 0=domingo...6=sábado).
+const ALMOCO_DAY_KEYS = ['domingo','segunda','terca','quarta','quinta','sexta','sabado'];
+function todayAlmocoKey(){ return ALMOCO_DAY_KEYS[new Date().getDay()]; }
+
+async function initAlmoco(){
+  const el = document.getElementById('almoco-grid');
+  try{
+    const res = await fetch('data/almoco.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('Falha ao carregar data/almoco.json');
+    const data = await res.json();
+    const dayKey = todayAlmocoKey();
+    const day = data.dias && data.dias[dayKey];
+    if(!day || !day.pratos || !day.pratos.length){
+      el.innerHTML = '<div class="card" style="cursor:default"><div class="card-body"><div class="card-name">Sem marmitex hoje</div><div class="card-desc">Chama a gente no WhatsApp pra ver o que tem disponível.</div></div></div>';
+      return;
+    }
+    const product = {
+      id: 'almoco-' + dayKey,
+      name: 'Marmitex do dia',
+      desc: (day.acompanhamentos||[]).join(' · '),
+      img: day.pratos[0].image || undefined,
+      prices: data.sizes,
+      paused: false,
+      _almocoPratos: day.pratos,
+      _almocoVeg: data.vegetariana || [],
+      _almocoAdicionais: day.adicionais || []
+    };
+    buildCards('almoco-grid', [product]);
+  } catch(err){
+    console.error('Erro ao carregar almoço', err);
+    el.innerHTML = `<div class="card" style="cursor:default">
+      <div class="card-body">
+        <div class="card-name">Cardápio indisponível no momento</div>
+        <div class="card-desc">Não consegui carregar o almoço agora. Chama a gente no WhatsApp pra ver o que tem disponível.</div>
+      </div>
+    </div>`;
+  }
+}
+
 loadAddons();
+initAlmoco();
 initCategory('data/jantinhas.json', 'jantinhas-grid', 'Jantinhas');
 initCategory('data/espetinhos.json', 'espetinhos-grid', 'Espetinhos');
 initCategory('data/omeletes.json', 'omeletes-grid', 'Omeletes');

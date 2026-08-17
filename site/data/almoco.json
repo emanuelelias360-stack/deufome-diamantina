@@ -1,0 +1,57 @@
+{
+  "sizes": { "550ml": 16.90, "700ml": 21.90 },
+  "vegetariana": [
+    { "name": "Omelete (ovo + queijo)" },
+    { "name": "Ovo frito" }
+  ],
+  "dias": {
+    "segunda": {
+      "pratos": [
+        { "name": "Frango ao molho", "image": "" },
+        { "name": "Bife de porco acebolado", "image": "" }
+      ],
+      "acompanhamentos": ["Arroz", "Feijão de caldo", "Macarrão alho e óleo", "Salada de alface e tomate"],
+      "adicionais": [
+        { "name": "Porção extra de arroz", "price": 3.00 },
+        { "name": "Macarrão", "price": 4.00 },
+        { "name": "Frango", "price": 7.00 },
+        { "name": "Bife", "price": 7.00 },
+        { "name": "Ovo", "price": 3.00 },
+        { "name": "Salada", "price": 3.00 }
+      ]
+    },
+    "terca": {
+      "pratos": [
+        { "name": "Carne de panela com batata", "image": "" },
+        { "name": "Frango frito (coxa e sobrecoxa)", "image": "" }
+      ],
+      "acompanhamentos": ["Arroz", "Feijão de caldo", "Purê de batata", "Farofa", "Salada de tomate com repolho"],
+      "adicionais": [
+        { "name": "Porção extra de arroz", "price": 3.00 },
+        { "name": "Purê de batata", "price": 3.00 },
+        { "name": "Carne com batata", "price": 7.00 },
+        { "name": "Frango frito", "price": 7.00 },
+        { "name": "Ovo", "price": 3.00 },
+        { "name": "Salada", "price": 3.00 }
+      ]
+    },
+    "quarta": {
+      "pratos": [
+        { "name": "Strogonoff", "image": "" },
+        { "name": "Espaguete à bolonhesa", "image": "" }
+      ],
+      "acompanhamentos": ["Arroz", "Strogonoff", "Batata palha", "Macarrão", "Molho à bolonhesa", "Mussarela"],
+      "adicionais": [
+        { "name": "Porção extra de arroz", "price": 3.00 },
+        { "name": "Strogonoff", "price": 5.00 },
+        { "name": "Batata palha", "price": 3.00 },
+        { "name": "Bolonhesa", "price": 5.00 },
+        { "name": "Mussarela", "price": 3.00 }
+      ]
+    },
+    "quinta": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
+    "sexta": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
+    "sabado": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
+    "domingo": { "pratos": [], "acompanhamentos": [], "adicionais": [] }
+  }
+}
