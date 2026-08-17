@@ -1255,7 +1255,7 @@ window.addEventListener('scroll', ()=>{
   let current = NAV_SECTIONS[0];
   NAV_SECTIONS.forEach(s=>{
     const el = document.getElementById('sec-'+s);
-    if(el && el.getBoundingClientRect().top - offset - 40 <= 0) current = s;
+    if(el && el.style.display!=='none' && el.getBoundingClientRect().top - offset - 40 <= 0) current = s;
   });
   const select = document.getElementById('cat-select');
   if(select.value !== 'sec-'+current) select.value = 'sec-'+current;
@@ -1297,7 +1297,34 @@ function updateStatus(){
   text.className = 'status-text ' + (isOpen ? 'open' : 'closed');
   text.textContent = isOpen ? 'Aberto agora' : 'Fechado no momento';
   document.getElementById('status-hours').textContent = '· ' + hoursLabel;
+
+  updateMenuVisibility(total, almocoStart, almocoEnd, jantaStart, jantaEnd);
 }
+
+// Categorias exclusivas de cada horário — sobremesas/bebidas/adicionais ficam
+// disponíveis nos dois períodos (complementam tanto almoço quanto jantinha).
+const LUNCH_ONLY_CATS = ['almoco'];
+const DINNER_ONLY_CATS = ['jantinhas', 'espetinhos', 'omeletes', 'macarrao'];
+
+function setCategoryVisible(key, visible){
+  const section = document.getElementById('sec-'+key);
+  if(section) section.style.display = visible ? '' : 'none';
+  const option = document.querySelector(`#cat-select option[value="sec-${key}"]`);
+  if(option) option.hidden = !visible;
+}
+
+function updateMenuVisibility(total, almocoStart, almocoEnd, jantaStart, jantaEnd){
+  const isAlmocoTime = total >= almocoStart && total < almocoEnd;
+  const isJantaTime = total >= jantaStart && total < jantaEnd;
+  // Fora dos dois horários (ex: 14h30-18h) mostra tudo, pra não travar quem
+  // quer dar uma olhada ou adiantar um pedido fora do horário de funcionamento.
+  const showLunch = isAlmocoTime || (!isAlmocoTime && !isJantaTime);
+  const showDinner = isJantaTime || (!isAlmocoTime && !isJantaTime);
+
+  LUNCH_ONLY_CATS.forEach(k=>setCategoryVisible(k, showLunch));
+  DINNER_ONLY_CATS.forEach(k=>setCategoryVisible(k, showDinner));
+}
+
 updateStatus();
 setInterval(updateStatus, 60000);
 
