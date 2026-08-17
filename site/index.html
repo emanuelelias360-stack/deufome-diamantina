@@ -1317,12 +1317,12 @@ function setCategoryVisible(key, visible){
 function updateMenuVisibility(total, almocoStart, almocoEnd, jantaStart, jantaEnd){
   const isAlmocoTime = total >= almocoStart && total < almocoEnd;
   const isJantaTime = total >= jantaStart && total < jantaEnd;
-  // Fora dos dois horários (ex: 14h30-18h) mostra tudo, pra não travar quem
-  // quer dar uma olhada ou adiantar um pedido fora do horário de funcionamento.
-  const showLunch = isAlmocoTime || (!isAlmocoTime && !isJantaTime);
+  // Almoço só aparece no horário real de almoço (marmitex do dia não faz
+  // sentido fora desse intervalo). Janta continua aparecendo também fora
+  // dos dois horários (ex: 14h30-18h), pra quem quiser adiantar o pedido.
   const showDinner = isJantaTime || (!isAlmocoTime && !isJantaTime);
 
-  LUNCH_ONLY_CATS.forEach(k=>setCategoryVisible(k, showLunch));
+  LUNCH_ONLY_CATS.forEach(k=>setCategoryVisible(k, isAlmocoTime));
   DINNER_ONLY_CATS.forEach(k=>setCategoryVisible(k, showDinner));
 }
 
