@@ -49,9 +49,51 @@
         { "name": "Mussarela", "price": 3.00 }
       ]
     },
-    "quinta": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
-    "sexta": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
-    "sabado": { "pratos": [], "acompanhamentos": [], "adicionais": [] },
-    "domingo": { "pratos": [], "acompanhamentos": [], "adicionais": [] }
+    "quinta": {
+      "pratos": [
+        { "name": "Filé de frango", "image": "" },
+        { "name": "Isca de carne acebolada", "image": "" }
+      ],
+      "acompanhamentos": ["Arroz", "Tutu de feijão", "Salada de legumes", "Salada de tomate em rodelas"],
+      "adicionais": [
+        { "name": "Porção extra de arroz", "price": 3.00 },
+        { "name": "Salada de legumes", "price": 4.00 },
+        { "name": "Filé de frango", "price": 7.00 },
+        { "name": "Isca de carne", "price": 7.00 },
+        { "name": "Ovo", "price": 3.00 },
+        { "name": "Salada", "price": 3.00 }
+      ]
+    },
+    "sexta": {
+      "pratos": [
+        { "name": "Bisteca acebolada", "image": "" },
+        { "name": "Linguiça assada", "image": "" }
+      ],
+      "acompanhamentos": ["Arroz", "Feijão com calabresa", "Batata frita", "Vinagrete"],
+      "adicionais": [
+        { "name": "Porção extra de arroz", "price": 3.00 },
+        { "name": "Bisteca acebolada", "price": 7.00 },
+        { "name": "Linguiça assada", "price": 7.00 },
+        { "name": "Batata frita", "price": 5.00 },
+        { "name": "Ovo", "price": 3.00 },
+        { "name": "Vinagrete", "price": 3.00 }
+      ]
+    },
+    "sabado": {
+      "pratos": [
+        { "name": "Feijoada", "image": "" },
+        { "name": "Tropeiro", "image": "" }
+      ],
+      "acompanhamentos": [],
+      "adicionais": []
+    },
+    "domingo": {
+      "pratos": [
+        { "name": "Feijoada", "image": "" },
+        { "name": "Tropeiro", "image": "" }
+      ],
+      "acompanhamentos": [],
+      "adicionais": []
+    }
   }
 }
