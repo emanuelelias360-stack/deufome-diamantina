@@ -162,6 +162,7 @@
     background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
     overflow:hidden;cursor:pointer;display:flex;align-items:stretch;position:relative;
     transition:border-color .2s, box-shadow .2s;
+    height:128px;
   }
   .card:hover,.card:active{border-color:var(--orange);box-shadow:var(--shadow)}
   .card-body{padding:12px 12px 12px 14px;flex:1;display:flex;flex-direction:column;min-width:0}
@@ -179,7 +180,7 @@
   }
   .btn-add:hover{background:var(--orange-strong);transform:scale(1.08)}
   .btn-add:active{transform:scale(.95)}
-  .card-img-wrap{width:92px;flex-shrink:0;background:var(--card-2)}
+  .card-img-wrap{width:92px;flex-shrink:0;background:var(--card-2);overflow:hidden}
   .card-img{width:100%;height:100%;object-fit:cover}
   .card-placeholder{
     width:100%;height:100%;background:var(--card-2);
